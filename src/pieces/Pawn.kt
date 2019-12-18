@@ -15,11 +15,9 @@ class Pawn(black: Boolean = false) : Piece(black) {
         if (validStartEnd(start, end)) {
             when {
                 onlyVertical(start, end) -> {
-//                    debug("Only vertical")
-                    // Can only move if end is empty
-                    if(end.empty()) {
+                    if(end.empty() && checkVerticalUnblocked(board, start, end)) {
                         val allowedDiff = direction * if (startTile(start)) 2 else 1
-                        return diff == allowedDiff || diff == direction
+                        return (diff == allowedDiff || diff == direction )
                     }
                 }
                 onlyDiagonal(start, end) -> {

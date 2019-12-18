@@ -1,4 +1,5 @@
 import pieces.Move
+import shared.getColorText
 import java.lang.Exception
 import java.util.*
 
@@ -13,22 +14,14 @@ abstract class Player(val black: Boolean) {
     )
 
     open fun sendMessage(umm: Any) {
-        println("To $this \n $umm")
+        println("To ${getColorText(black)} \n $umm")
     }
 
     override fun toString(): String {
-        return "Black: ${black} ${super.toString()}"
+        return "${getColorText(black)} ${super.toString()}"
     }
 }
 
-class AIPlayer(black: Boolean) : Player(black) {
-    override fun determineNextMove(
-        board: Board,
-        onDetermined: (Move) -> Unit
-    ) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
 
 class ConsolePlayer(black: Boolean) : Player(black) {
     val input = Scanner(System.`in`)

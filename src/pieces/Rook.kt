@@ -1,8 +1,26 @@
 package pieces
 
 import Board
+import shared.debugln
 
-class Rook(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black) {
+class Rook(black: Boolean = false) : Piece(black) {
+
+    fun getHasMoved(board: Board): Boolean {
+        return if (black) {
+            board.blackRookMoved
+        } else {
+            board.whiteRookMoved
+        }
+    }
+
+    fun setHasMoved(board: Board, value: Boolean) {
+        if (black) {
+            board.blackRookMoved = value
+        } else {
+            board.whiteRookMoved = value
+        }
+    }
+
     override fun validMove(board: Board, start: Tile, end: Tile): Boolean {
         if (validStartEnd(start, end)) return when {
             onlyHorizontal(
@@ -35,7 +53,9 @@ class Rook(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black)
     override fun makeMove(board: Board, move: Move) {
         val flag = validMove(board, move)
         super.makeMove(board, move)
-        hasMoved = flag
+        if (getHasMoved(board)) {
+            setHasMoved(board, flag)
+        }
     }
 
     override fun toString(): String {

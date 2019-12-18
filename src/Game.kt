@@ -29,18 +29,21 @@ class Game(
 
     fun nextMove() {
         debug("Check checkmate and shit")
-        debug(board.isKingOnCheckmate(true))
-        debug(board.isKingOnCheckmate(false))
+        debug(board.isKingInCheckmate(true))
+        debug(board.isKingInCheckmate(false))
         when {
-            board.isKingOnCheckmate(true) -> {
+            board.isKingInCheckmate(true) -> {
+                sendBothAMessage(board)
                 sendBothAMessage("Checkmate, White wins!")
                 gameState = GameState.WIN_WHITE
             }
-            board.isKingOnCheckmate(false) -> {
+            board.isKingInCheckmate(false) -> {
+                sendBothAMessage(board)
                 sendBothAMessage("Checkmate, Black wins!")
                 gameState = GameState.WIN_BLACK
             }
-            board.isKingOnStalemate() -> {
+            board.isKingInStalemate() -> {
+                sendBothAMessage(board)
                 sendBothAMessage("Stalemate, it's a draw!")
                 gameState = GameState.STALEMATE
             }

@@ -1,10 +1,28 @@
 package pieces
 
 import Board
+import shared.*
 import kotlin.math.abs
 
 
-class King(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black) {
+class King(black: Boolean = false) : Piece(black) {
+
+    fun getHasMoved(board: Board): Boolean {
+        return if (black) {
+            board.blackKingMoved
+        } else {
+            board.whiteKingMoved
+        }
+    }
+
+    fun setHasMoved(board: Board, value: Boolean) {
+        if (black) {
+            board.blackKingMoved = value
+        } else {
+            board.whiteKingMoved = value
+        }
+    }
+
     // TODO: Test castling
     /*
     Castling: Can only happen once, and only if king and rook did not move at all throughout the game.
@@ -16,10 +34,15 @@ class King(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black)
     The king must not end up in check.
      */
     override fun validMove(board: Board, start: Tile, end: Tile): Boolean {
-        if (checkCastling(board, start, end)) return true
+        if (checkCastling(board, start, end)) {
+            debugln("Move from $start to $end is apparently castling. HasMoved: ${getHasMoved(board)} ")
+            debugln("The actual board: ${board.getParseableStateString()}")
+            debugln("black King moved: ${board.blackKingMoved}")
+            return true
+        }
         if (!validStartEnd(start, end)) return false
         return if (checkValidShift(start, end)) {
-            if (end.piece != null) {
+            if (!end.empty()) {
                 opppnents(start, end)
             } else {
                 true
@@ -27,27 +50,44 @@ class King(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black)
         } else false
     }
 
+    fun atStartPosition(pos: BoardPosition): Boolean {
+        return if (black) {
+            pos.x == 4 && pos.y == 0
+        } else {
+            pos.x == 4 && pos.y == 7
+        }
+    }
+
     override fun makeMove(board: Board, move: Move) {
+        debug("Make move called on king")
         val flag = validMove(board, move)
         super.makeMove(board, move)
-        hasMoved = flag
+        if (getHasMoved(board)) {
+            setHasMoved(board, flag)
+            debugln("HAS MOVED FLAG SET")
+        }
     }
 
     override fun getCopy(): King {
-        return King(black)
+        val copy = King(black)
+        return copy
     }
 
     fun checkCastling(board: Board, start: Tile, end: Tile): Boolean {
         return if (end.piece is Rook) {
-            val endPiece = end.piece as Rook
-            return (!hasMoved && !endPiece.hasMoved && !opppnents(
-                start,
-                end
-            ) && checkHorizontalUnblocked(
-                board,
-                start,
-                end
-            ))
+            if (atStartPosition(start)) {
+                val endPiece = end.piece as Rook
+                return (!getHasMoved(board) && !endPiece.getHasMoved(board) && !opppnents(
+                    start,
+                    end
+                ) && checkHorizontalUnblocked(
+                    board,
+                    start,
+                    end
+                ))
+            } else {
+                false
+            }
         } else false
     }
 

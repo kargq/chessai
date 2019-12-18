@@ -1,10 +1,7 @@
 import pieces.*
-import shared.debug
-import java.io.ByteArrayInputStream
+import shared.*
 import java.io.InputStream
-import java.io.StringReader
 import java.util.*
-import kotlin.math.*
 
 /*
 
@@ -76,31 +73,51 @@ class Board(
             Knight(),
             Rook()
         )
-    )
-) {
+    ),
+    var whiteKingMoved: Boolean = false,
+    var blackKingMoved: Boolean = false,
+    var whiteRookMoved: Boolean = false,
+    var blackRookMoved: Boolean = false,
     // Not null if pawn skipped a position the last position on the board, stores the position it skipped from
     var pawnSkip: BoardPosition? = null
+) {
 
 
     private val grid: List<List<Tile>>
 
     fun getParseableStateString(): String {
         var result = ""
-        for (x in 0..7) {
-            for (y in 0..7) {
+        for (y in 0..7) {
+            for (x in 0..7) {
                 result += "${getPieceString(getTile(x, y).piece)} "
             }
+            result += "\n"
+        }
+        result += " $whiteKingMoved "
+        result += " $blackKingMoved "
+        result += " $whiteRookMoved "
+        result += " $blackRookMoved "
+        if(pawnSkip != null) {
+            result += " ${pawnSkip!!.x} "
+            result += " ${pawnSkip!!.y} "
         }
         return result
     }
 
     fun getPieceString(piece: Piece?): String {
-        return if (piece == null) "x" else piece.toString()
+        return if (piece == null) "x  " else piece.toString()
     }
 
     fun getCopy(): Board {
-        val result = Board(getPieceArray())
-        result.pawnSkip = pawnSkip?.let { BoardPosition(it.x, it.y) }
+        val result = Board(
+            getPieceArray(),
+            whiteKingMoved = whiteKingMoved,
+            blackKingMoved = blackKingMoved,
+            whiteRookMoved = whiteRookMoved,
+            blackRookMoved = blackRookMoved,
+            pawnSkip = pawnSkip?.let { BoardPosition(it.x, it.y) }
+        )
+        debug("Original: ${this.getParseableStateString()}, Copied: ${result.getParseableStateString()}")
         return result
     }
 
@@ -114,9 +131,19 @@ class Board(
             tempGrid.add(currRow)
         }
         grid = tempGrid
+        debug(getParseableStateString())
     }
 
-    constructor(inp: InputStream) : this(parseInput(inp))
+    constructor(
+        inp: InputStream,
+        whiteKingMoved: Boolean = false,
+        blackKingMoved: Boolean = false,
+        whiteRookMoved: Boolean = false,
+        blackRookMoved: Boolean = false,
+        // Not null if pawn skipped a position the last position on the board, stores the position it skipped from
+        pawnSkip: BoardPosition? = null
+    ) : this(parseInput(inp), whiteKingMoved, blackKingMoved, whiteRookMoved, blackRookMoved, pawnSkip)
+
     constructor(inp: String) : this(parseInput(stringInputStream(inp)))
 
     fun getPieceArray(): List<List<Piece?>> {
@@ -151,7 +178,7 @@ class Board(
             }
             result += "\n"
         }
-        return result
+        return "$result ${getParseableStateString()}"
     }
 
     fun getAllPieceTiles(black: Boolean): List<Tile> {
@@ -195,16 +222,20 @@ class Board(
         }
     }
 
-    fun getKingTile(black: Boolean): Tile {
+    fun getKingTile(black: Boolean): Tile? {
+//        debugln("Get king for $this")
+//        debugln()
         forAllPieceTiles(black) { tile, piece ->
+            //            debug(" $tile ")
             if (piece is King) {
                 return tile
             }
         }
-        return null!!
+//        debugln()
+        return null
     }
 
-    fun isKingOnCheckmate(black: Boolean): Boolean {
+    fun isKingInCheckmate(black: Boolean): Boolean {
 //        val king = getKingTile(black)
 //        king.piece?.let { piece ->
 //            piece.generateAllValidMoves(this, king).forEach {
@@ -229,49 +260,52 @@ class Board(
 //            return true
 //        } else return false'
         val states = generateAllBoardStates(black)
-//        debug(states)
+        debug(states)
         for ((index, state) in states.withIndex()) {
-//            debug("Checking state $index")
+            debug("Checking state $index")
             if (!state.isKingInCheck(black)) {
                 debug("${getColorText(black)} KING is not on check, board state $state \n at $index for \n ${this}")
                 return false
             }
         }
-//        debug("${getColorText(black)} KING is on check \n ${this}")
+        debug("${getColorText(black)} KING is on check \n ${this}")
         return true
     }
 
-    fun getColorText(black: Boolean): String {
-        return if (black) "Black" else "White"
+    inline fun forAllValidMoves(black: Boolean, callback: (move: Move) -> Unit) {
+        forAllPieceTiles(black) { tile, piece ->
+            for (move in piece.generateAllValidMoves(this, tile)) {
+                callback(move)
+            }
+        }
+    }
+
+    fun isKingInCheckmate(): Boolean {
+        return isKingInCheckmate(false) || isKingInCheckmate(true)
     }
 
 
     // TODO: Some sort of caching for these results
-    fun isKingOnStalemate(black: Boolean): Boolean {
+    fun isKingInStalemate(black: Boolean): Boolean {
         val kingTile = getKingTile(black)
-        if (!isPositionCheck(kingTile, black)) {
-            // It's not currently in check, but everything else should be a check around it.
-            var numValidMoves = 0
-//            debug("Stalemate king at $kingTile")
-            for (x in max(kingTile.x - 1, 0)..min(kingTile.x + 1, 7)) {
-                for (y in max(kingTile.y - 1, 0)..min(kingTile.y + 1, 7)) {
-                    if (x != kingTile.x && y != kingTile.y) {
-                        val currPos = BoardPosition(x, y)
-//                        debug("Stalemate $currPos")
-                        kingTile.piece?.let {
-                            if (it.validMove(this@Board, kingTile, getTile(x, y))) {
-                                numValidMoves++
-                                // Even if one valid position avoids check, it's fine
-                                if (!isPositionCheck(currPos, black)) return false
-                            }
-                        }
+        if (kingTile != null) {
+            if (!isKingInCheck(black)) {
+                // It's not currently in check, but everything else should be a check around it.
+                var numValidMoves = 0
+                forAllValidMoves(black) { move ->
+                    numValidMoves++
+                    val newBoard = getCopy()
+                    newBoard.executeMove(move)
+                    if (!newBoard.isKingInCheck(black)) {
+                        println("Not in check: $newBoard")
+                        return false
                     }
                 }
+                return numValidMoves > 0
+            } else {
+                return false
             }
-            return numValidMoves > 0
-        } else {
-            return false
-        }
+        } else return false
     }
 
     fun executeMove(move: Move) {
@@ -280,8 +314,8 @@ class Board(
         }
     }
 
-    fun isKingOnStalemate(): Boolean {
-        return isKingOnStalemate(true) || isKingOnStalemate(false)
+    fun isKingInStalemate(): Boolean {
+        return isKingInStalemate(true) || isKingInStalemate(false)
     }
 
     fun isPositionCheck(pos: BoardPosition, checkAgainstBlack: Boolean): Boolean {
@@ -304,11 +338,15 @@ class Board(
     fun isKingInCheck(black: Boolean): Boolean {
 //        debug("Check if ${getColorText(black)} king is in check")
         val king = getKingTile(black)
-        val result = isPositionCheck(king, black)
-        if (!result) {
+        if (king != null) {
+            val result = isPositionCheck(king, black)
+            if (!result) {
 //            debug("King is not in check for $this")
+            }
+            return result
+        } else {
+            return true
         }
-        return result
     }
 
     fun generateAllBoardStates(black: Boolean): List<Board> {
