@@ -1,4 +1,5 @@
 import pieces.*
+import shared.debug
 
 /*
 
@@ -38,7 +39,7 @@ class Board {
             Bishop(true),
             Queen(true),
             King(true),
-            Queen(true),
+            Bishop(true),
             Knight(true),
             Rook(true)
         ),
@@ -72,7 +73,7 @@ class Board {
             Bishop(),
             Queen(),
             King(),
-            Queen(),
+            Bishop(),
             Knight(),
             Rook()
         )
@@ -99,8 +100,13 @@ class Board {
         return getTile(p.x, p.y)
     }
 
-    fun setPiece(x: Int, y: Int, pc: Piece) {
-        grid[x][y].piece = pc
+    fun setPiece(x: Int, y: Int, pc: Piece?) {
+        grid[y][x].piece = pc
+    }
+
+    fun setPiece(p: BoardPosition, pc: Piece?) {
+        debug("set ${p.x} ${p.y} to $pc")
+        setPiece(p.x, p.y, pc)
     }
 
     override fun toString(): String {

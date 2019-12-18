@@ -1,6 +1,7 @@
 package pieces
 
 import Board
+import PromotionType
 import shared.debug
 import kotlin.math.*
 
@@ -9,11 +10,19 @@ abstract class Piece(val black: Boolean) {
 
     abstract fun validMove(board: Board, start: Tile, end: Tile): Boolean
 
+
     /**
      * Always call from start piece
      */
-    fun makeMove(board: Board, start: Tile, end: Tile) {
+    open fun makeMove(board: Board, move: Move) {
+        makeMoveDelegate(board, board.getTile(move.getStart()), board.getTile(move.getEnd()))
+    }
 
+    /**
+     * Always call from start piece
+     */
+    private fun makeMoveDelegate(board: Board, start: Tile, end: Tile) {
+        board.pawnSkip = null
         if (validMove(board, start, end)) {
             end.piece = start.piece
             start.piece = null
@@ -22,19 +31,58 @@ abstract class Piece(val black: Boolean) {
         }
     }
 
+    fun validMove(board: Board, move: Move): Boolean {
+        return validMove(board, board.getTile(move.startX, move.startY), board.getTile(move.endX, move.endY))
+    }
+
     protected fun validStartEnd(start: Tile, end: Tile): Boolean {
         return !start.empty() && (end.empty() || opppnents(start, end))
     }
 
+    fun generateAllValidMoves(board: Board, start: BoardPosition): List<Move> {
+        val result = mutableListOf<Move>()
+        for (x in 0..7) {
+            for (y in 0..7) {
+                val move = Move(start, BoardPosition(x, y))
+                if (validMove(board, move)) result.add(move)
+            }
+        }
+        return result
+    }
+
+}
+
+class Move(
+    val startX: Int,
+    val startY: Int,
+    val endX: Int,
+    val endY: Int,
+    val promotionType: PromotionType = PromotionType.QUEEN
+) {
+    constructor(start: BoardPosition, end: BoardPosition, promotionType: PromotionType = PromotionType.QUEEN) : this(
+        start.x,
+        start.y,
+        end.x,
+        end.y,
+        promotionType
+    )
+
+    fun getStart() : BoardPosition {
+        return BoardPosition(startX, startY)
+    }
+
+    fun getEnd() : BoardPosition {
+        return  BoardPosition(endX, endY)
+    }
 }
 
 
 fun getStartValue(from: Int, to: Int): Int {
-    return if (from < to) from + 1 else from - 1
+    return if (from < to) from + 1 else to + 1
 }
 
 fun getEndValue(from: Int, to: Int): Int {
-    return if (to < from) to + 1 else from - 1
+    return if (to > from) to - 1 else from - 1
 }
 
 // Unblocked methods omit start and end.
@@ -68,15 +116,18 @@ fun checkVerticalUnblocked(board: Board, start: Tile, end: Tile): Boolean {
 
 fun checkDiagonalUnblocked(board: Board, start: Tile, end: Tile): Boolean {
     if (start.identicalPosition(end)) return true
-    val startX = getStartValue(start.x, end.x)
-    val startY = getStartValue(start.y, end.y)
 
-    val endX = getEndValue(start.x, end.x)
-    val graduations = startX - endX
+    val xDir = (end.x - start.x).sign
+    val yDir = (end.y - start.y).sign
+
+    val startX = start.x + xDir
+    val startY = start.y + yDir
+
+    val graduations = abs(end.x - start.x) - 1
 
     if (onlyDiagonal(start, end)) {
-        for (g in 0..graduations) {
-            if (!board.getTile(startX + g, startY + g).empty()) return false
+        for (g in 0 until graduations) {
+            if (!board.getTile(startX + g * xDir, startY + g * yDir).empty()) return false
         }
         return true
     } else return false
@@ -88,7 +139,7 @@ fun onlyHorizontal(start: Tile, end: Tile): Boolean {
 }
 
 fun onlyVertical(start: Tile, end: Tile): Boolean {
-    return (start.y == end.y) && (start.x != end.x)
+    return (start.x == end.x) && (start.y != end.y)
 }
 
 fun onlyDiagonal(start: Tile, end: Tile): Boolean {
