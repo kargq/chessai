@@ -1,6 +1,6 @@
 package shared
 
-var enabled = true
+var enabled = false
 
 fun debug(umm: Any = "") {
     if (enabled)
@@ -14,10 +14,9 @@ fun debugln(umm: Any = "") {
 
 var aienabled = true
 
-
 fun debugai(umm: Any = "") {
     if (aienabled)
-    println("DEBUGAI:/ $umm")
+        println("DEBUGAI:/ $umm")
 }
 
 fun getColorText(black: Boolean): String {

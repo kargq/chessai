@@ -297,7 +297,6 @@ class Board(
                     val newBoard = getCopy()
                     newBoard.executeMove(move)
                     if (!newBoard.isKingInCheck(black)) {
-                        println("Not in check: $newBoard")
                         return false
                     }
                 }

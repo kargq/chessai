@@ -1,7 +1,7 @@
 package pieces
 
 import Board
-import shared.debug
+import shared.*
 import withinBounds
 import kotlin.math.abs
 

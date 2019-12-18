@@ -7,7 +7,7 @@ import pieces.*
 import shared.*
 import kotlin.math.*
 
-class AIPlayer(black: Boolean) : Player(black) {
+class AIPlayer(black: Boolean, val print: Boolean = false) : Player(black) {
     override fun determineNextMove(
         board: Board,
         onDetermined: (Move) -> Unit
@@ -17,17 +17,18 @@ class AIPlayer(black: Boolean) : Player(black) {
 
     override fun sendMessage(umm: Any) {
         // Do nothing
+        if(print) println(umm)
     }
 }
 
 const val KING_WEIGHT = 10
-const val QUEEN_WEIGHT = 8
-const val BISHOP_WEIGHT = 5
-const val ROOK_WEIGHT = 5
-const val PAWN_WEIGHT = 2
-const val KNIGHT_WEIGHT = 6
+const val QUEEN_WEIGHT = 90
+const val BISHOP_WEIGHT = 30
+const val ROOK_WEIGHT = 50
+const val KNIGHT_WEIGHT = 30
+const val PAWN_WEIGHT = 10
 
-fun determineMove(board: Board, black: Boolean, ply: Int = 3): Move {
+fun determineMove(board: Board, black: Boolean, ply: Int = 2): Move {
     debugai("Determine move for ${getColorText(black)}")
     var bestHeur = Integer.MIN_VALUE
     var result: Move = Move(-1, -1, -1, -1)
@@ -97,7 +98,6 @@ fun alphabeta(board: Board, ply: Int, ab: AlphaBetaStore, black: Boolean, blackM
 
 fun heuristic(board: Board, black: Boolean): Int {
 
-    debugai("Heuristic for ${getColorText(black)}")
     var value = 0
 
     board.forAllPieceTiles(black) { tile, piece ->
@@ -136,10 +136,13 @@ fun heuristic(board: Board, black: Boolean): Int {
         value += 1000
     }
 
+//    debugai("Heuristic for ${getColorText(black)} is ${value}")
     return value
 }
 
 fun main() {
-    val game = Game(blackPlayer = AIPlayer(true))
+    val game = Game(whitePlayer = AIPlayer(false), blackPlayer = AIPlayer(true, print = true))
+//    val game = Game(whitePlayer = AIPlayer(true))
+//    val game = Game(blackPlayer = AIPlayer(true))
     game.startGameLoop()
 }
