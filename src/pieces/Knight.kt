@@ -22,4 +22,8 @@ class Knight(black: Boolean = false) : Piece(black) {
         }
     }
 
+    override fun getCopy(): Knight {
+        return Knight(black)
+    }
+
 }

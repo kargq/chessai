@@ -5,6 +5,7 @@ import kotlin.math.abs
 
 
 class King(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black) {
+    // TODO: Test castling
     /*
     Castling: Can only happen once, and only if king and rook did not move at all throughout the game.
     The king has not previously moved;
@@ -26,6 +27,16 @@ class King(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black)
         } else false
     }
 
+    override fun makeMove(board: Board, move: Move) {
+        val flag = validMove(board, move)
+        super.makeMove(board, move)
+        hasMoved = flag
+    }
+
+    override fun getCopy(): King {
+        return King(black)
+    }
+
     fun checkCastling(board: Board, start: Tile, end: Tile): Boolean {
         return if (end.piece is Rook) {
             val endPiece = end.piece as Rook
@@ -42,7 +53,7 @@ class King(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black)
 
 
     private fun checkValidShift(start: Tile, end: Tile): Boolean {
-        return abs(start.x - end.x) == 1 || abs(start.y - end.y) == 1
+        return abs(start.x - end.x) <= 1 && abs(start.y - end.y) <= 1
     }
 
     override fun toString(): String {

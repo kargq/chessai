@@ -18,4 +18,8 @@ class Bishop(black: Boolean = false) : Piece(black) {
             "BIW"
         }
     }
+
+    override fun getCopy(): Bishop {
+        return Bishop(black)
+    }
 }

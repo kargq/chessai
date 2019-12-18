@@ -32,6 +32,7 @@ abstract class Piece(val black: Boolean) {
     }
 
     fun validMove(board: Board, move: Move): Boolean {
+
         return validMove(board, board.getTile(move.startX, move.startY), board.getTile(move.endX, move.endY))
     }
 
@@ -39,17 +40,23 @@ abstract class Piece(val black: Boolean) {
         return !start.empty() && (end.empty() || opppnents(start, end))
     }
 
-    fun generateAllValidMoves(board: Board, start: BoardPosition): List<Move> {
+    open fun generateAllValidMoves(board: Board, start: BoardPosition): List<Move> {
+        // TODO: override this at least for king and maybe pawn
+        // TODO: Get moves for promotion too
         val result = mutableListOf<Move>()
         for (x in 0..7) {
             for (y in 0..7) {
                 val move = Move(start, BoardPosition(x, y))
-                if (validMove(board, move)) result.add(move)
+                if (validMove(board, move)) {
+//                    debug("Valid move $move")
+                    result.add(move)
+                }
             }
         }
         return result
     }
 
+    abstract fun getCopy(): Piece
 }
 
 class Move(
@@ -67,12 +74,16 @@ class Move(
         promotionType
     )
 
-    fun getStart() : BoardPosition {
+    fun getStart(): BoardPosition {
         return BoardPosition(startX, startY)
     }
 
-    fun getEnd() : BoardPosition {
-        return  BoardPosition(endX, endY)
+    fun getEnd(): BoardPosition {
+        return BoardPosition(endX, endY)
+    }
+
+    override fun toString(): String {
+        return "${getStart()} to ${getEnd()}"
     }
 }
 
@@ -115,6 +126,8 @@ fun checkVerticalUnblocked(board: Board, start: Tile, end: Tile): Boolean {
 }
 
 fun checkDiagonalUnblocked(board: Board, start: Tile, end: Tile): Boolean {
+//    debug("checking diagonal")
+
     if (start.identicalPosition(end)) return true
 
     val xDir = (end.x - start.x).sign
@@ -163,6 +176,10 @@ open class BoardPosition(
     fun identicalPosition(pos: BoardPosition): Boolean {
         return x == pos.x && y == pos.y
     }
+
+    override fun toString(): String {
+        return "($x, $y)"
+    }
 }
 
 
@@ -184,7 +201,8 @@ class Tile(
     }
 
     override fun toString(): String {
-        return if (piece == null) "___" else piece.toString()
+        val pcStr =  if (piece == null) "___" else piece.toString()
+        return "[$x,$y] $pcStr"
     }
 }
 

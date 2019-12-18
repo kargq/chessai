@@ -1,4 +1,5 @@
 import pieces.Move
+import shared.debug
 import java.lang.Exception
 
 class Game(
@@ -17,7 +18,7 @@ class Game(
 
     }
 
-    val gameState: GameState = GameState.ACTIVE
+    var gameState: GameState = GameState.ACTIVE
     var blackTurn = false
 
     fun startGameLoop() {
@@ -27,15 +28,34 @@ class Game(
     }
 
     fun nextMove() {
-        sendBothAMessage("Black player turn: $blackTurn")
-        sendBothAMessage(board)
-        if (!blackTurn) {
-            whitePlayer.determineNextMove(board) { move: Move ->
-                makeMove(whitePlayer, move)
+        debug("Check checkmate and shit")
+        debug(board.isKingOnCheckmate(true))
+        debug(board.isKingOnCheckmate(false))
+        when {
+            board.isKingOnCheckmate(true) -> {
+                sendBothAMessage("Checkmate, White wins!")
+                gameState = GameState.WIN_WHITE
             }
-        } else {
-            blackPlayer.determineNextMove(board) { move: Move ->
-                makeMove(blackPlayer, move)
+            board.isKingOnCheckmate(false) -> {
+                sendBothAMessage("Checkmate, Black wins!")
+                gameState = GameState.WIN_BLACK
+            }
+            board.isKingOnStalemate() -> {
+                sendBothAMessage("Stalemate, it's a draw!")
+                gameState = GameState.STALEMATE
+            }
+            else -> {
+                sendBothAMessage("Black player turn: $blackTurn")
+                sendBothAMessage(board)
+                if (!blackTurn) {
+                    whitePlayer.determineNextMove(board) { move: Move ->
+                        makeMove(whitePlayer, move)
+                    }
+                } else {
+                    blackPlayer.determineNextMove(board) { move: Move ->
+                        makeMove(blackPlayer, move)
+                    }
+                }
             }
         }
     }

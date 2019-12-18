@@ -15,11 +15,12 @@ class Pawn(black: Boolean = false) : Piece(black) {
         if (validStartEnd(start, end)) {
             when {
                 onlyVertical(start, end) -> {
-                    debug("IT IS ONLY VERTICAL, WOYEARRRAK $diff")
+//                    debug("Only vertical")
                     // Can only move if end is empty
-                    val allowedDiff = direction * if (startTile(start)) 2 else 1
-                    debug("IT IS ONLY VERTICAL, WOYEARRRAK $diff $allowedDiff")
-                    return diff == allowedDiff || diff == direction
+                    if(end.empty()) {
+                        val allowedDiff = direction * if (startTile(start)) 2 else 1
+                        return diff == allowedDiff || diff == direction
+                    }
                 }
                 onlyDiagonal(start, end) -> {
                     // Handle normal kill move
@@ -33,6 +34,10 @@ class Pawn(black: Boolean = false) : Piece(black) {
             }
         }
         return false
+    }
+
+    override fun getCopy(): Piece {
+        return Pawn(black)
     }
 
     fun atStartPosition(tile: Tile): Boolean {
@@ -57,13 +62,11 @@ class Pawn(black: Boolean = false) : Piece(black) {
                     board.pawnSkip = null
                 }
             }
-            debug("Hey at least this should be a valid move")
             end.piece = start.piece
             start.piece = null
 
 
         } else {
-            debug("NOT A VALID MOVE")
         }
 
 
@@ -92,14 +95,11 @@ class Pawn(black: Boolean = false) : Piece(black) {
     }
 
     private fun checkEnPassant(board: Board, start: Tile, end: Tile): Boolean {
-        debug("checking for en passant")
         val diff = end.y - start.y
         // check en passant
         // if previous move skipped the current captureable position, do it
         if (abs(diff) == 1) {
-            debug("Pawn skip: ${board.pawnSkip}")
             if (board.pawnSkip != null) {
-                debug("Okay pawn skip is not null")
                 val skippedPawnTile = board.getTile(board.pawnSkip!!)
                 if (skippedPawnTile.piece != null) {
                     val piece = skippedPawnTile.piece

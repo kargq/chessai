@@ -4,16 +4,16 @@ import Board
 
 class Rook(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black) {
     override fun validMove(board: Board, start: Tile, end: Tile): Boolean {
-        if (validStartEnd(start, end)) when {
+        if (validStartEnd(start, end)) return when {
             onlyHorizontal(
                 start,
                 end
-            ) -> return checkHorizontalUnblocked(board, start, end)
+            ) -> checkHorizontalUnblocked(board, start, end)
             onlyVertical(
                 start,
                 end
-            ) -> return checkVerticalUnblocked(board, start, end)
-            else -> return false
+            ) -> checkVerticalUnblocked(board, start, end)
+            else -> false
         } else {
             // Handle castling case
             if (!opppnents(start, end)) {
@@ -26,6 +26,16 @@ class Rook(black: Boolean = false, var hasMoved: Boolean = false) : Piece(black)
             }
             return false
         }
+    }
+
+    override fun getCopy(): Rook {
+        return Rook(black)
+    }
+
+    override fun makeMove(board: Board, move: Move) {
+        val flag = validMove(board, move)
+        super.makeMove(board, move)
+        hasMoved = flag
     }
 
     override fun toString(): String {
