@@ -49,8 +49,8 @@ fun selectPlayer(input: Scanner, black: Boolean, player1: Player? = null): Playe
     val option = input.nextInt()
     when (option) {
         1 -> {
-            println("Select ply: ")
-            val ply = input.nextInt()
+            println("Select ply(>0): ")
+            val ply = input.nextInt() + 1 // does evaluate the next one layer at 0
             return AIPlayer(black, print = player1 is AIPlayer, ply = ply)
         }
         2 -> {

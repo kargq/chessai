@@ -163,7 +163,7 @@ class Board(
     }
 
     override fun toString(): String {
-        var result = "${super.toString()}\n"
+        var result = ""
         result += "  0   1   2   3   4   5   6   7\n"
         for (y in 0..7) {
             result += "$y "
@@ -172,7 +172,7 @@ class Board(
             }
             result += "\n"
         }
-        return "$result ${getParseableStateString()}"
+        return "$result===\nBoard state(parseable by this program):-\n ${getParseableStateString()}"
     }
 
     fun getAllPieceTiles(black: Boolean): List<Tile> {
