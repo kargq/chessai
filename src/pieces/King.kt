@@ -3,6 +3,7 @@ package pieces
 import Board
 import shared.*
 import kotlin.math.abs
+import kotlin.math.sign
 
 
 class King(black: Boolean = false) : Piece(black) {
@@ -61,7 +62,21 @@ class King(black: Boolean = false) : Piece(black) {
     override fun makeMove(board: Board, move: Move) {
         debug("Make move called on king")
         val flag = validMove(board, move)
-        super.makeMove(board, move)
+        if (checkCastling(board, board.getTile(move.getStart()), board.getTile(move.getEnd()))) {
+            val rookDirection = (move.endX - move.startX).sign
+            val moveBy = 2 * rookDirection
+            val kingX = move.startX + moveBy
+            val rookX = kingX - rookDirection
+            val y = move.startY
+            val king = board.getTile(move.getStart()).piece!!
+            val rook = board.getTile(move.getEnd()).piece!!
+            board.setPiece(move.getStart(), null)
+            board.setPiece(move.getEnd(), null)
+            board.setPiece(kingX, y, king)
+            board.setPiece(rookX, y, rook)
+        } else {
+            super.makeMove(board, move)
+        }
         if (getHasMoved(board)) {
             setHasMoved(board, flag)
             debugln("HAS MOVED FLAG SET")

@@ -34,16 +34,20 @@ class Rook(black: Boolean = false) : Piece(black) {
             else -> false
         } else {
             // Handle castling case
-            if (!opppnents(start, end)) {
-                if (end.piece != null) {
-                    val endKing = end.piece!!
-                    if (endKing is King) {
-                        return endKing.checkCastling(board, start, end)
-                    }
+            return checkRookCastling(board, start, end)
+        }
+    }
+
+    fun checkRookCastling(board: Board, start: Tile, end: Tile): Boolean {
+        if (!opppnents(start, end)) {
+            if (end.piece != null) {
+                val endKing = end.piece!!
+                if (endKing is King) {
+                    return endKing.checkCastling(board, start, end)
                 }
             }
-            return false
         }
+        return false
     }
 
     override fun getCopy(): Rook {
@@ -52,7 +56,12 @@ class Rook(black: Boolean = false) : Piece(black) {
 
     override fun makeMove(board: Board, move: Move) {
         val flag = validMove(board, move)
-        super.makeMove(board, move)
+        if (checkRookCastling(board, board.getTile(move.getStart()), board.getTile(move.getEnd()))) {
+            val king = board.getTile(move.getEnd()).piece!! as King
+            king.makeMove(board, move)
+        } else {
+            super.makeMove(board, move)
+        }
         if (getHasMoved(board)) {
             setHasMoved(board, flag)
         }

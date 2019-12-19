@@ -97,7 +97,7 @@ class Board(
         result += " $blackKingMoved "
         result += " $whiteRookMoved "
         result += " $blackRookMoved "
-        if(pawnSkip != null) {
+        if (pawnSkip != null) {
             result += " ${pawnSkip!!.x} "
             result += " ${pawnSkip!!.y} "
         }
@@ -285,8 +285,9 @@ class Board(
     }
 
 
-    // TODO: Some sort of caching for these results
+    private val kingStalemateCache: LRUCacheMap<Tile, Boolean> = LRUCacheMap(100)
     fun isKingInStalemate(black: Boolean): Boolean {
+
         val kingTile = getKingTile(black)
         if (kingTile != null) {
             if (!isKingInCheck(black)) {
@@ -317,21 +318,31 @@ class Board(
         return isKingInStalemate(true) || isKingInStalemate(false)
     }
 
+    private val positionCheckMap: LRUCacheMap<BoardPosition, Boolean> = LRUCacheMap(100)
     fun isPositionCheck(pos: BoardPosition, checkAgainstBlack: Boolean): Boolean {
-        // Only works when pos is empty or pos is opponent .
-        // Could pass in new board if this does not work.
-        val startTiles = getAllPieceTiles(!checkAgainstBlack)
-        val endTile = getTile(pos)
+        if (!positionCheckMap.containsKey(pos)) {
+            var result = false
+            // Only works when pos is empty or pos is opponent .
+            // Could pass in new board if this does not work.
+            val startTiles = getAllPieceTiles(!checkAgainstBlack)
+            val endTile = getTile(pos)
 //        debug("Start tiles being checked to have a move towards ${endTile}, checking if ${getKingTile(checkAgainstBlack)} is under check. \n $startTiles")
-        // Check if any of the start tiles has a valid move to endTile
-        for (startTile in startTiles) {
-            startTile.piece?.let { piece ->
-                //                debug("Check valid move from $startTile to $endTile")
-                if (piece.validMove(this, startTile, endTile)) return true
-//                debug("No valid move from $startTile to $endTile")
+            // Check if any of the start tiles has a valid move to endTile
+            for (startTile in startTiles) {
+                startTile.piece?.let { piece ->
+                    //                debug("Check valid move from $startTile to $endTile")
+                    if (piece.validMove(this, startTile, endTile)) {
+                        result = true
+                        return@let
+                    }
+                }
+                if (result) break
             }
+            positionCheckMap[pos] = result
+            return result
+        } else {
+            return positionCheckMap[pos]!!
         }
-        return false
     }
 
     fun isKingInCheck(black: Boolean): Boolean {

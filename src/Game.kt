@@ -5,7 +5,8 @@ import java.lang.Exception
 class Game(
     val board: Board = Board(),
     val blackPlayer: Player = ConsolePlayer(true),
-    val whitePlayer: Player = ConsolePlayer(false)
+    val whitePlayer: Player = ConsolePlayer(false),
+    var blackTurn: Boolean = false
 ) {
     init {
         if (!blackPlayer.black) {
@@ -19,7 +20,6 @@ class Game(
     }
 
     var gameState: GameState = GameState.ACTIVE
-    var blackTurn = false
 
     fun startGameLoop() {
         while (gameState == GameState.ACTIVE) {
