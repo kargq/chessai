@@ -1,6 +1,7 @@
 package tests
 
 import Board
+import Game
 import java.io.FileInputStream
 
 fun main() {
@@ -22,6 +23,7 @@ fun main() {
 //    println(board4.isKingInCheck(true))
 //    println(board4.isKingInCheckmate(true))
 //    println(board4.isKingInStalemate(true))
-
+    val game = Game(board = Board(FileInputStream("tests/promotion")))
+    game.startGameLoop()
 
 }

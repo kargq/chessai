@@ -1,5 +1,6 @@
 import pieces.Move
 import shared.debug
+import shared.getColorText
 import java.lang.Exception
 
 class Game(
@@ -48,8 +49,8 @@ class Game(
                 gameState = GameState.STALEMATE
             }
             else -> {
-                sendBothAMessage("Black player turn: $blackTurn")
                 sendBothAMessage(board)
+                sendBothAMessage("Turn: ${getColorText(blackTurn)}")
                 if (!blackTurn) {
                     whitePlayer.determineNextMove(board) { move: Move ->
                         makeMove(whitePlayer, move)

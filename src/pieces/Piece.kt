@@ -41,8 +41,6 @@ abstract class Piece(val black: Boolean) {
     }
 
     open fun generateAllValidMoves(board: Board, start: BoardPosition): List<Move> {
-        // TODO: override this at least for king and maybe pawn
-        // TODO: Get moves for promotion too
         val result = mutableListOf<Move>()
         for (x in 0..7) {
             for (y in 0..7) {
@@ -73,6 +71,15 @@ class Move(
         end.y,
         promotionType
     )
+
+    fun getNewPromotionPiece(black: Boolean) : Piece{
+        return when(promotionType) {
+            PromotionType.QUEEN -> Queen(black)
+            PromotionType.ROOK -> Rook(black)
+            PromotionType.KNIGHT -> Knight(black)
+            PromotionType.BISHOP -> Bishop(black)
+        }
+    }
 
     fun getStart(): BoardPosition {
         return BoardPosition(startX, startY)

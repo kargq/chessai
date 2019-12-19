@@ -63,9 +63,19 @@ class Pawn(black: Boolean = false) : Piece(black) {
             end.piece = start.piece
             start.piece = null
 
-
-        } else {
+            if(black) {
+                if(end.y == 7) {
+                    // Promote
+                    board.setPiece(end, move.getNewPromotionPiece(black))
+                }
+            } else {
+                if(end.y == 0) {
+                    // Promote
+                    board.setPiece(end, move.getNewPromotionPiece(black))
+                }
+            }
         }
+
 
 
         if (passant) board.setPiece(passantPos!!, null)
