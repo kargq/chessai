@@ -90,11 +90,17 @@ class Game(
 
     fun validPlayerMove(player: Player, startX: Int, startY: Int, endX: Int, endY: Int): Boolean {
         if (player.black == blackTurn) {
-            val startTile = board.getTile(startX, startY)
-            val endTile = board.getTile(endX, endY)
-            startTile.piece?.let {
-                if (it.black != blackTurn) return false
-                if (it.validMove(board, startTile, endTile)) return true
+            // Check check resolution
+            val boardCopy = board.getCopy()
+            boardCopy.executeMove(Move(startX, startY, endX, endY))
+            // Can't result in a check.
+            if(!boardCopy.isKingInCheck(blackTurn)) {
+                val startTile = board.getTile(startX, startY)
+                val endTile = board.getTile(endX, endY)
+                startTile.piece?.let {
+                    if (it.black != blackTurn) return false
+                    if (it.validMove(board, startTile, endTile)) return true
+                }
             }
         }
         return false

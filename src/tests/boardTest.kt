@@ -23,7 +23,10 @@ fun main() {
 //    println(board4.isKingInCheck(true))
 //    println(board4.isKingInCheckmate(true))
 //    println(board4.isKingInStalemate(true))
-    val game = Game(board = Board(FileInputStream("tests/promotion")))
-    game.startGameLoop()
 
+//    val game = Game(board = Board(FileInputStream("tests/promotion")))
+//    game.startGameLoop()
+
+    val game = Game(board = Board(FileInputStream("tests/knighttest")), blackTurn = true)
+    game.startGameLoop()
 }

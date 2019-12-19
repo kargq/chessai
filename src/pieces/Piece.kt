@@ -26,13 +26,10 @@ abstract class Piece(val black: Boolean) {
         if (validMove(board, start, end)) {
             end.piece = start.piece
             start.piece = null
-        } else {
-            debug("NOT A VALID MOVE")
         }
     }
 
     fun validMove(board: Board, move: Move): Boolean {
-
         return validMove(board, board.getTile(move.startX, move.startY), board.getTile(move.endX, move.endY))
     }
 
@@ -72,8 +69,8 @@ class Move(
         promotionType
     )
 
-    fun getNewPromotionPiece(black: Boolean) : Piece{
-        return when(promotionType) {
+    fun getNewPromotionPiece(black: Boolean): Piece {
+        return when (promotionType) {
             PromotionType.QUEEN -> Queen(black)
             PromotionType.ROOK -> Rook(black)
             PromotionType.KNIGHT -> Knight(black)
@@ -208,7 +205,7 @@ class Tile(
     }
 
     override fun toString(): String {
-        val pcStr =  if (piece == null) "___" else piece.toString()
+        val pcStr = if (piece == null) "___" else piece.toString()
         return "[$x,$y] $pcStr"
     }
 }

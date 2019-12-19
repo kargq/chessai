@@ -354,7 +354,8 @@ class Board(
             piece.generateAllValidMoves(this, tile).forEach { move ->
                 val newBoard = getCopy()
                 newBoard.executeMove(move)
-                result.add(newBoard)
+                // don't add if own king is put in check by the move
+                if (!newBoard.isKingInCheck(black)) result.add(newBoard)
             }
         }
         return result

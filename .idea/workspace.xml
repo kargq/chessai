@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/src/AI/AI.kt" line="199" />
+    <bookmark url="file://$PROJECT_DIR$/src/AI/AI.kt" line="206" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="72425ef2-811e-449d-99fc-bac73a74c967" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/promotion" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/knighttest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/chesskt/Board.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/chesskt/Board.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/chesskt/BoardKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/chesskt/BoardKt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/chesskt/Game.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/chesskt/Game.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AI/AI.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/AI/AI.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Board.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Board.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Game.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Game.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pieces/Pawn.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/pieces/Pawn.kt" afterDir="false" />
@@ -28,8 +32,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/pieces/Piece.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
+            <state relative-caret-position="28">
+              <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
               <folding>
                 <element signature="e#16#90#0" expanded="true" />
               </folding>
@@ -37,11 +41,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/pieces/Pawn.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="71" column="29" selection-start-line="71" selection-start-column="29" selection-end-line="71" selection-end-column="29" />
+            <state relative-caret-position="15">
+              <caret line="8" column="51" selection-start-line="8" selection-start-column="51" selection-end-line="8" selection-end-column="51" />
             </state>
           </provider>
         </entry>
@@ -50,7 +54,7 @@
         <entry file="file://$PROJECT_DIR$/tests/promotion">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="75">
-              <caret line="5" column="29" lean-forward="true" selection-start-line="5" selection-start-column="29" selection-end-line="5" selection-end-column="29" />
+              <caret line="5" column="29" selection-start-line="5" selection-start-column="29" selection-end-line="5" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -67,17 +71,38 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Board.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="284">
-              <caret line="85" column="21" selection-start-line="85" selection-start-column="21" selection-end-line="85" selection-end-column="21" />
+            <state relative-caret-position="173">
+              <caret line="389" column="40" lean-forward="true" selection-start-line="389" selection-start-column="40" selection-end-line="389" selection-end-column="40" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tests/knighttest">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="8" column="27" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Game.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="41" column="39" lean-forward="true" selection-start-line="41" selection-start-column="39" selection-end-line="41" selection-end-column="39" />
+            <state relative-caret-position="398">
+              <caret line="95" column="39" selection-start-line="95" selection-start-column="39" selection-end-line="95" selection-end-column="39" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/AI/AI.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="52">
+              <caret line="26" column="35" lean-forward="true" selection-start-line="26" selection-start-column="35" selection-end-line="26" selection-end-column="35" />
+              <folding>
+                <element signature="e#12#103#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -97,32 +122,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/tests/boardTest.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="26" column="24" selection-start-line="26" selection-start-column="24" selection-end-line="26" selection-end-column="24" />
+            <state relative-caret-position="435">
+              <caret line="29" column="17" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
               <folding>
                 <element signature="e#15#58#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/AI/AI.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="23" column="28" selection-start-line="29" selection-end-line="29" selection-end-column="1" />
-              <folding>
-                <element signature="e#12#103#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Player.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="293">
-              <caret line="45" column="26" selection-start-line="45" selection-start-column="26" selection-end-line="45" selection-end-column="26" />
             </state>
           </provider>
         </entry>
@@ -140,11 +144,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Has moved</find>
-      <find>get coy</find>
-      <find>get copy</find>
-      <find>getcopy</find>
-      <find>HAS MOVED FLAG SET</find>
       <find>getCopy</find>
       <find>hasMove</find>
       <find>Original</find>
@@ -168,8 +167,13 @@
       <find>move from</find>
       <find>Move</find>
       <find>start</find>
+      <find>getAllS</find>
       <find>black player turn</find>
+      <find>generate</find>
+      <find>exe</find>
       <find>promotion</find>
+      <find>executeMove</find>
+      <find>blackTurn</find>
     </findStrings>
     <replaceStrings>
       <replace>x</replace>
@@ -209,20 +213,22 @@
         <option value="$PROJECT_DIR$/tests/whatdsf" />
         <option value="$PROJECT_DIR$/src/shared/LRUCacheMap.java" />
         <option value="$PROJECT_DIR$/src/shared/LRUCacheMap.kt" />
-        <option value="$PROJECT_DIR$/src/AI/AI.kt" />
-        <option value="$PROJECT_DIR$/src/Board.kt" />
-        <option value="$PROJECT_DIR$/src/pieces/Piece.kt" />
         <option value="$PROJECT_DIR$/tests/promotion" />
-        <option value="$PROJECT_DIR$/src/tests/boardTest.kt" />
-        <option value="$PROJECT_DIR$/src/Game.kt" />
         <option value="$PROJECT_DIR$/src/pieces/Pawn.kt" />
+        <option value="$PROJECT_DIR$/src/pieces/Piece.kt" />
+        <option value="$PROJECT_DIR$/src/AI/AI.kt" />
+        <option value="$PROJECT_DIR$/tests/knighttest" />
+        <option value="$PROJECT_DIR$/src/tests/boardTest.kt" />
+        <option value="$PROJECT_DIR$/src/Board.kt" />
+        <option value="$PROJECT_DIR$/src/Game.kt" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="y" value="23" />
-    <option name="width" value="1680" />
-    <option name="height" value="983" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="194" />
+    <option name="y" value="92" />
+    <option name="width" value="2280" />
+    <option name="height" value="1249" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -244,23 +250,6 @@
               <item name="chesskt" type="b2602c69:ProjectViewProjectNode" />
               <item name="chesskt" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="chesskt" type="b2602c69:ProjectViewProjectNode" />
-              <item name="chesskt" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="pieces" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="chesskt" type="b2602c69:ProjectViewProjectNode" />
-              <item name="chesskt" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="tests" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="chesskt" type="b2602c69:ProjectViewProjectNode" />
-              <item name="chesskt" type="462c0819:PsiDirectoryNode" />
-              <item name="tests" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -392,7 +381,7 @@
       <workItem from="1576550406696" duration="1877000" />
       <workItem from="1576592952478" duration="88580000" />
       <workItem from="1576724090933" duration="255000" />
-      <workItem from="1576724363720" duration="994000" />
+      <workItem from="1576724363720" duration="4729000" />
     </task>
     <task id="LOCAL-00001" summary="Working game mostly&#10;&#10;Some stuff here should probably not be committed... workspace.xml for &#10;instance">
       <created>1576645060351</created>
@@ -422,11 +411,18 @@
       <option name="project" value="LOCAL" />
       <updated>1576712583411</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Promotion works">
+      <created>1576725493899</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1576725493900</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="91876000" />
+    <option name="totallyTimeSpent" value="95611000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -438,10 +434,9 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1680" height="983" extended-state="0" />
-    <editor active="true" />
+    <frame x="0" y="23" width="2560" height="1373" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.15934066" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10365369" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -451,7 +446,7 @@
       <window_info id="Favorites" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32996634" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.35129067" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.24434036" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39955106" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -483,7 +478,8 @@
     <MESSAGE value="Stalemate and chessmate working" />
     <MESSAGE value="stalemate works?" />
     <MESSAGE value="Did some stuff?" />
-    <option name="LAST_COMMIT_MESSAGE" value="Did some stuff?" />
+    <MESSAGE value="Promotion works" />
+    <option name="LAST_COMMIT_MESSAGE" value="Promotion works" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -776,16 +772,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/AI/AI.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="28" selection-start-line="29" selection-end-line="29" selection-end-column="1" />
-          <folding>
-            <element signature="e#12#103#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Player.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="293">
@@ -803,17 +789,7 @@
     <entry file="file://$PROJECT_DIR$/tests/promotion">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
-          <caret line="5" column="29" lean-forward="true" selection-start-line="5" selection-start-column="29" selection-end-line="5" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/tests/boardTest.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="26" column="24" selection-start-line="26" selection-start-column="24" selection-end-line="26" selection-end-column="24" />
-          <folding>
-            <element signature="e#15#58#0" expanded="true" />
-          </folding>
+          <caret line="5" column="29" selection-start-line="5" selection-start-column="29" selection-end-line="5" selection-end-column="29" />
         </state>
       </provider>
     </entry>
@@ -827,34 +803,61 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Game.kt">
+    <entry file="file://$PROJECT_DIR$/src/pieces/Pawn.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="41" column="39" lean-forward="true" selection-start-line="41" selection-start-column="39" selection-end-line="41" selection-end-column="39" />
+        <state relative-caret-position="15">
+          <caret line="8" column="51" selection-start-line="8" selection-start-column="51" selection-end-line="8" selection-end-column="51" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Board.kt">
+    <entry file="file://$PROJECT_DIR$/src/AI/AI.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="284">
-          <caret line="85" column="21" selection-start-line="85" selection-start-column="21" selection-end-line="85" selection-end-column="21" />
+        <state relative-caret-position="52">
+          <caret line="26" column="35" lean-forward="true" selection-start-line="26" selection-start-column="35" selection-end-line="26" selection-end-column="35" />
+          <folding>
+            <element signature="e#12#103#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/knighttest">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="27" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tests/boardTest.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="29" column="17" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
+          <folding>
+            <element signature="e#15#58#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/pieces/Piece.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
+        <state relative-caret-position="28">
+          <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
           <folding>
             <element signature="e#16#90#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/pieces/Pawn.kt">
+    <entry file="file://$PROJECT_DIR$/src/Board.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="71" column="29" selection-start-line="71" selection-start-column="29" selection-end-line="71" selection-end-column="29" />
+        <state relative-caret-position="173">
+          <caret line="389" column="40" lean-forward="true" selection-start-line="389" selection-start-column="40" selection-end-line="389" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Game.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="398">
+          <caret line="95" column="39" selection-start-line="95" selection-start-column="39" selection-end-line="95" selection-end-column="39" />
         </state>
       </provider>
     </entry>
