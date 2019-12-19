@@ -287,7 +287,19 @@ class Board(
 
     private val kingStalemateCache: LRUCacheMap<Tile, Boolean> = LRUCacheMap(100)
     fun isKingInStalemate(black: Boolean): Boolean {
+        val kingTile = getKingTile(black)
+        if (kingTile != null) {
+            if (kingStalemateCache.containsKey(kingTile)) {
+                return kingStalemateCache[kingTile]!!
+            } else {
+                return isKingInStalemateDelegate(black)
+            }
+        } else {
+            return false
+        }
+    }
 
+    fun isKingInStalemateDelegate(black: Boolean): Boolean {
         val kingTile = getKingTile(black)
         if (kingTile != null) {
             if (!isKingInCheck(black)) {
@@ -331,7 +343,7 @@ class Board(
             for (startTile in startTiles) {
                 startTile.piece?.let { piece ->
                     //                debug("Check valid move from $startTile to $endTile")
-                    if (piece.validMove(this, startTile, endTile)) {
+                    if (piece.validMove(this, Move(startTile, endTile))) {
                         result = true
                         return@let
                     }
@@ -345,14 +357,11 @@ class Board(
         }
     }
 
+
     fun isKingInCheck(black: Boolean): Boolean {
-//        debug("Check if ${getColorText(black)} king is in check")
         val king = getKingTile(black)
         if (king != null) {
             val result = isPositionCheck(king, black)
-            if (!result) {
-//            debug("King is not in check for $this")
-            }
             return result
         } else {
             return true

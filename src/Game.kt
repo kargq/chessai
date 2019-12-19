@@ -1,5 +1,6 @@
 import pieces.Move
 import shared.debug
+import shared.getColorText
 import java.lang.Exception
 
 class Game(
@@ -28,9 +29,6 @@ class Game(
     }
 
     fun nextMove() {
-        debug("Check checkmate and shit")
-        debug(board.isKingInCheckmate(true))
-        debug(board.isKingInCheckmate(false))
         when {
             board.isKingInCheckmate(true) -> {
                 sendBothAMessage(board)
@@ -48,7 +46,7 @@ class Game(
                 gameState = GameState.STALEMATE
             }
             else -> {
-                sendBothAMessage("Black player turn: $blackTurn")
+                sendBothAMessage("Turn ${getColorText(blackTurn)}")
                 sendBothAMessage(board)
                 if (!blackTurn) {
                     whitePlayer.determineNextMove(board) { move: Move ->
@@ -93,7 +91,7 @@ class Game(
             val endTile = board.getTile(endX, endY)
             startTile.piece?.let {
                 if (it.black != blackTurn) return false
-                if (it.validMove(board, startTile, endTile)) return true
+                if (it.validMove(board, Move(startTile, endTile))) return true
             }
         }
         return false

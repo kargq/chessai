@@ -8,7 +8,7 @@ import kotlin.math.*
 
 abstract class Piece(val black: Boolean) {
 
-    abstract fun validMove(board: Board, start: Tile, end: Tile): Boolean
+    protected abstract fun validMove(board: Board, start: Tile, end: Tile): Boolean
 
 
     /**
@@ -31,7 +31,14 @@ abstract class Piece(val black: Boolean) {
         }
     }
 
-    fun validMove(board: Board, move: Move): Boolean {
+    open fun validMove(board: Board, move: Move): Boolean {
+        val boardCopy = board.getCopy()
+        val startTile = boardCopy.getTile(move.getStart())
+        val endTile = boardCopy.getTile(move.getEnd())
+        boardCopy.setPiece(endTile, startTile.piece)
+        boardCopy.setPiece(startTile, null)
+
+        if (boardCopy.isKingInCheck(black)) return false
 
         return validMove(board, board.getTile(move.startX, move.startY), board.getTile(move.endX, move.endY))
     }
@@ -201,7 +208,7 @@ class Tile(
     }
 
     override fun toString(): String {
-        val pcStr =  if (piece == null) "___" else piece.toString()
+        val pcStr = if (piece == null) "___" else piece.toString()
         return "[$x,$y] $pcStr"
     }
 }
