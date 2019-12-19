@@ -27,6 +27,6 @@ fun main() {
 //    val game = Game(board = Board(FileInputStream("tests/promotion")))
 //    game.startGameLoop()
 
-    val game = Game(board = Board(FileInputStream("tests/knighttest")), blackTurn = true)
-    game.startGameLoop()
+//    val game = Game(board = Board(FileInputStream("tests/knighttest")), blackTurn = true)
+//    game.startGameLoop()
 }

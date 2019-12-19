@@ -1,6 +1,7 @@
 package AI
 
 import Board
+import constructBoardFromInput
 import java.util.*
 
 val EXIT = listOf("EXIT", "exit")
@@ -9,7 +10,7 @@ fun main() {
     val input = Scanner(System.`in`)
     while (currIn !in EXIT) {
 //        currIn = input.next()
-        val board = Board(System.`in`)
+        val board = constructBoardFromInput(System.`in`)
 
         println("Heuristic: ${heuristic(board, true)}")
         println("Check black:${board.isKingInCheckmate(true)}")

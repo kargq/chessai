@@ -79,11 +79,26 @@ class Board(
     var whiteRookMoved: Boolean = false,
     var blackRookMoved: Boolean = false,
     // Not null if pawn skipped a position the last position on the board, stores the position it skipped from
-    var pawnSkip: BoardPosition? = null
+    var pawnSkip: BoardPosition? = null,
+    var blackPlayerTurn: Boolean = false
 ) {
 
 
     private val grid: List<List<Tile>>
+
+
+    init {
+        val tempGrid: MutableList<List<Tile>> = mutableListOf()
+        for ((rIndex, row) in startArray.withIndex()) {
+            val currRow = mutableListOf<Tile>()
+            for ((cIndex, col) in row.withIndex()) {
+                currRow.add(Tile(cIndex, rIndex, col))
+            }
+            tempGrid.add(currRow)
+        }
+        grid = tempGrid
+        debug(getParseableStateString())
+    }
 
     fun getParseableStateString(): String {
         var result = ""
@@ -97,10 +112,14 @@ class Board(
         result += " $blackKingMoved "
         result += " $whiteRookMoved "
         result += " $blackRookMoved "
+        result += " $blackPlayerTurn "
         if (pawnSkip != null) {
             result += " ${pawnSkip!!.x} "
             result += " ${pawnSkip!!.y} "
+        } else {
+            result += " -1 -1 "
         }
+        result += "\n"
         return result
     }
 
@@ -120,31 +139,6 @@ class Board(
         debug("Original: ${this.getParseableStateString()}, Copied: ${result.getParseableStateString()}")
         return result
     }
-
-    init {
-        val tempGrid: MutableList<List<Tile>> = mutableListOf()
-        for ((rIndex, row) in startArray.withIndex()) {
-            val currRow = mutableListOf<Tile>()
-            for ((cIndex, col) in row.withIndex()) {
-                currRow.add(Tile(cIndex, rIndex, col))
-            }
-            tempGrid.add(currRow)
-        }
-        grid = tempGrid
-        debug(getParseableStateString())
-    }
-
-    constructor(
-        inp: InputStream,
-        whiteKingMoved: Boolean = false,
-        blackKingMoved: Boolean = false,
-        whiteRookMoved: Boolean = false,
-        blackRookMoved: Boolean = false,
-        // Not null if pawn skipped a position the last position on the board, stores the position it skipped from
-        pawnSkip: BoardPosition? = null
-    ) : this(parseInput(inp), whiteKingMoved, blackKingMoved, whiteRookMoved, blackRookMoved, pawnSkip)
-
-    constructor(inp: String) : this(parseInput(stringInputStream(inp)))
 
     fun getPieceArray(): List<List<Piece?>> {
         return grid.map { it.map { tile -> tile.piece?.getCopy() } }
@@ -236,29 +230,6 @@ class Board(
     }
 
     fun isKingInCheckmate(black: Boolean): Boolean {
-//        val king = getKingTile(black)
-//        king.piece?.let { piece ->
-//            piece.generateAllValidMoves(this, king).forEach {
-//                if (!isPositionCheck(it.getEnd(), black)) return false
-//            }
-//            // Even if one position avoids check, it's fine
-//        }
-//        val king = getKingTile(black)
-//        if (isPositionCheck(king, black)) {
-//            for (x in max(king.x - 1, 0)..min(king.x + 1, 7)) {
-//                for (y in max(king.x - 1, 0)..min(king.x + 1, 7)) {
-//                    if (x != king.x && y != king.y) {
-//                        king.piece?.let {
-//                            if (it.validMove(this@Board, king, getTile(x, y))) {
-//                                // Even if one valid position avoids check, it's fine
-//                                if (!isPositionCheck(BoardPosition(x, y), black)) return false
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            return true
-//        } else return false'
         val states = generateAllBoardStates(black)
         debug(states)
         for ((index, state) in states.withIndex()) {
@@ -366,18 +337,46 @@ fun withinBounds(xory: Int): Boolean {
     return xory in (0..7)
 }
 
+fun constructBoardFromInput(inp: InputStream): Board {
 
-fun parseInput(inp: InputStream): List<List<Piece?>> {
+    // Parse pieces
     val input: Scanner = Scanner(inp)
-    val result: MutableList<List<Piece?>> = mutableListOf()
+    val pieces: MutableList<List<Piece?>> = mutableListOf()
     for (rIndex in 0..7) {
         val currRow = mutableListOf<Piece?>()
         for (cIndex in 0..7) {
             currRow.add(stringToPiece(input.next()))
         }
-        result.add(currRow)
+        pieces.add(currRow)
     }
-    return result
+    println("Has white king moved from start position? (true/false)")
+    val whiteKingMoved: Boolean = input.nextBoolean()
+    println("Has black king moved from start position? (true/false)")
+    val blackKingMoved: Boolean = input.nextBoolean()
+    println("Has white rook moved from start position? (true/false)")
+    val whiteRookMoved: Boolean = input.nextBoolean()
+    println("Has black rook moved from start position? (true/false)")
+    val blackRookMoved: Boolean = input.nextBoolean()
+    println("Is Black Player's turn? (true/false)")
+    val blackPlayerTurn: Boolean = input.nextBoolean()
+    var pawnSkip: BoardPosition? = null
+
+    println("If a pawn has skipped it's position in the last move, enter x and y, else just enter -1 for both. ")
+    println("x: ")
+    var x = input.nextInt()
+    println("y: ")
+    var y = input.nextInt()
+
+    if(x in 0..7 && y in 0..7) {
+        pawnSkip = BoardPosition(x, y)
+    }
+
+    println("Board constructed from standard input!")
+    return Board(pieces, whiteKingMoved, blackKingMoved, whiteRookMoved, blackRookMoved, pawnSkip, blackPlayerTurn)
+}
+
+fun constructBoardFromInput(str: String): Board {
+    return constructBoardFromInput(stringInputStream(str))
 }
 
 fun stringInputStream(str: String): InputStream {

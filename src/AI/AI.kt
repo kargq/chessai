@@ -135,12 +135,14 @@ fun determineMove(board: Board, black: Boolean, ply: Int = 3): Move {
         for (move in piece.generateAllValidMoves(board, tile)) {
             val boardState = board.getCopy()
             boardState.executeMove(move)
-            val currHeur =
-                alphabeta(boardState, ply, AlphaBetaStore(), black, black, true)
-            debugai("$currHeur, $move")
-            if (currHeur > bestHeur) {
-                bestHeur = currHeur
-                result = move
+            if(!boardState.isKingInCheck(black)) {
+                val currHeur =
+                    alphabeta(boardState, ply, AlphaBetaStore(), blackMove = !black, black = black, maxPlayer = false)
+                debugai("$currHeur, $move")
+                if (currHeur > bestHeur) {
+                    bestHeur = currHeur
+                    result = move
+                }
             }
         }
     }
@@ -243,7 +245,7 @@ fun heuristic(board: Board, black: Boolean): Int {
 }
 
 fun main() {
-    val game = Game(whitePlayer = AIPlayer(false, ply = 1), blackPlayer = AIPlayer(true, print = true, ply = 3))
+    val game = Game(whitePlayer = AIPlayer(false, ply = 2), blackPlayer = AIPlayer(true, print = true, ply = 0))
 //    val game = Game(whitePlayer = AIPlayer(false))
 //    val game = Game(blackPlayer = AIPlayer(true))
     game.startGameLoop()

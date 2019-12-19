@@ -6,10 +6,19 @@ import java.lang.Exception
 class Game(
     val board: Board = Board(),
     val blackPlayer: Player = ConsolePlayer(true),
-    val whitePlayer: Player = ConsolePlayer(false),
-    var blackTurn: Boolean = false
+    val whitePlayer: Player = ConsolePlayer(false)
 ) {
+
+    var blackTurn: Boolean
+    get() {
+        return board.blackPlayerTurn
+    }
+    set(value){
+        board.blackPlayerTurn = value
+    }
+
     init {
+
         if (!blackPlayer.black) {
             throw Exception("No, it has to be black, just no")
         }
@@ -81,8 +90,8 @@ class Game(
                     blackTurn = !blackTurn
                 } else {
                     sendBothAMessage("Invalid move, please retry.")
-                    if (blackTurn) blackPlayer.sendMessage("Invalid move by YOU blackPlayer, try again please!")
-                    else whitePlayer.sendMessage("Invalid move by YOU whitePlayer, try again please!")
+                    if (blackTurn) blackPlayer.sendMessage("Invalid move by blackPlayer, try again!")
+                    else whitePlayer.sendMessage("Invalid move by whitePlayer, try again!")
                 }
             }
         return false
