@@ -1,94 +1,60 @@
 package pieces
 
 import Board
-import PromotionType
-import shared.debug
+import BoardPosition
+import Move
+import Tile
 import kotlin.math.*
 
 
 abstract class Piece(val black: Boolean) {
 
-    abstract fun validMove(board: Board, start: Tile, end: Tile): Boolean
+    var hasMoved = false
+
+    abstract fun checkPieceMoveConstraints(board: Board, move: Move): Boolean
 
 
     /**
-     * Always call from start piece
+     * Always call from start piece. Does not check for validity, just executes the move.
      */
-    open fun makeMove(board: Board, move: Move) {
-        makeMoveDelegate(board, board.getTile(move.getStart()), board.getTile(move.getEnd()))
-    }
-
-    /**
-     * Always call from start piece
-     */
-    private fun makeMoveDelegate(board: Board, start: Tile, end: Tile) {
-        board.pawnSkip = null
-        if (validMove(board, start, end)) {
-            end.piece = start.piece
-            start.piece = null
-        }
-    }
-
-    fun validMove(board: Board, move: Move): Boolean {
-        return validMove(board, board.getTile(move.startX, move.startY), board.getTile(move.endX, move.endY))
+    open fun movePiece(board: Board, move: Move) {
+        val start = board.getTile(move.getStart())
+        val end = board.getTile(move.getEnd())
+        end.piece = start.piece
+        start.piece = null
     }
 
     protected fun validStartEnd(start: Tile, end: Tile): Boolean {
         return !start.empty() && (end.empty() || opppnents(start, end))
     }
 
-    open fun generateAllValidMoves(board: Board, start: BoardPosition): List<Move> {
+    fun generateAllValidMoves(board: Board, start: BoardPosition): List<Move> {
         val result = mutableListOf<Move>()
-        for (x in 0..7) {
-            for (y in 0..7) {
-                val move = Move(start, BoardPosition(x, y))
-                if (validMove(board, move)) {
-//                    debug("Valid move $move")
-                    result.add(move)
-                }
-            }
+        forAllValidMovesFromPiece(board, start) {
+            result.add(it)
         }
         return result
     }
 
-    abstract fun getCopy(): Piece
-}
-
-class Move(
-    val startX: Int,
-    val startY: Int,
-    val endX: Int,
-    val endY: Int,
-    val promotionType: PromotionType = PromotionType.QUEEN
-) {
-    constructor(start: BoardPosition, end: BoardPosition, promotionType: PromotionType = PromotionType.QUEEN) : this(
-        start.x,
-        start.y,
-        end.x,
-        end.y,
-        promotionType
-    )
-
-    fun getNewPromotionPiece(black: Boolean): Piece {
-        return when (promotionType) {
-            PromotionType.QUEEN -> Queen(black)
-            PromotionType.ROOK -> Rook(black)
-            PromotionType.KNIGHT -> Knight(black)
-            PromotionType.BISHOP -> Bishop(black)
+    inline fun forAllValidMovesFromPiece(board: Board, start: BoardPosition, callback: (Move) -> Unit){
+        val result = mutableListOf<Move>()
+        for (x in 0..7) {
+            for (y in 0..7) {
+                val move = Move(start, BoardPosition(x, y))
+                if (checkPieceMoveConstraints(board, move)) {
+                    callback(move)
+                }
+            }
         }
     }
 
-    fun getStart(): BoardPosition {
-        return BoardPosition(startX, startY)
+    fun getCopy(): Piece {
+        val result = copyPiece()
+        result.hasMoved = hasMoved
+        return result
     }
 
-    fun getEnd(): BoardPosition {
-        return BoardPosition(endX, endY)
-    }
-
-    override fun toString(): String {
-        return "${getStart()} to ${getEnd()}"
-    }
+    protected abstract fun copyPiece(): Piece
 }
 
 
@@ -171,42 +137,5 @@ fun opppnents(p1: Piece, p2: Piece): Boolean {
 fun opppnents(t1: Tile, t2: Tile): Boolean {
     if (t1.piece == null || t2.piece == null) return false
     return opppnents(t1.piece!!, t2.piece!!)
-}
-
-open class BoardPosition(
-    val x: Int,
-    val y: Int
-) {
-    fun identicalPosition(pos: BoardPosition): Boolean {
-        return x == pos.x && y == pos.y
-    }
-
-    override fun toString(): String {
-        return "($x, $y)"
-    }
-}
-
-
-class Tile(
-    x: Int,
-    y: Int,
-    var piece: Piece? = null
-) : BoardPosition(x, y) {
-
-    fun empty(): Boolean {
-        return piece == null
-    }
-
-    fun ifNotEmpty(block: (piece: Piece) -> Unit) {
-        val piece: Piece? = piece
-        piece?.let {
-            block(piece)
-        }
-    }
-
-    override fun toString(): String {
-        val pcStr = if (piece == null) "___" else piece.toString()
-        return "[$x,$y] $pcStr"
-    }
 }
 

@@ -1,11 +1,14 @@
 package pieces
 
 import Board
+import Move
 import shared.debug
 
 class Queen(black: Boolean = false) : Piece(black) {
 
-    override fun validMove(board: Board, start: Tile, end: Tile): Boolean {
+    override fun checkPieceMoveConstraints(board: Board, move: Move): Boolean {
+        val start = board.getTile(move.getStart())
+        val end = board.getTile(move.getEnd())
 //        debug("checking queen")
         return if (validStartEnd(start, end)) {
 //            debug("Valid start and end for queen")
@@ -30,7 +33,7 @@ class Queen(black: Boolean = false) : Piece(black) {
         } else false
     }
 
-    override fun getCopy(): Queen {
+    override fun copyPiece(): Queen {
         return Queen(black)
     }
 

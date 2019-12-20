@@ -1,13 +1,8 @@
-import pieces.BoardPosition
-import pieces.Move
 import pieces.Pawn
 import shared.getColorText
 import java.lang.Exception
 import java.util.*
 
-enum class PromotionType {
-    QUEEN, ROOK, BISHOP, KNIGHT
-}
 
 abstract class Player(val black: Boolean) {
     abstract fun determineNextMove(
@@ -33,7 +28,9 @@ class ConsolePlayer(black: Boolean) : Player(black) {
         onDetermined: (Move) -> Unit
     ) {
         try {
-            println("Start X")
+            println("Following are prompts to enter the start and end coordinates, you don't have to follow this step by step.")
+            println("You can enter coordinates in one go, for example: 0 1 1 0")
+            println("Enter Start X")
             val startX = input.nextInt()
             println("Start Y")
             val startY = input.nextInt()
@@ -48,7 +45,7 @@ class ConsolePlayer(black: Boolean) : Player(black) {
 
             board.getTile(startPos).piece?.let {
                 if (it is Pawn) {
-                    if (it.validMove(board, Move(startPos, endPos))) {
+                    if (it.checkPieceMoveConstraints(board, Move(startPos, endPos))) {
                         if (it.black && startPos.y == 6 || !it.black && startPos.y == 1) {
                             println("Promotion might be possible in the next move, What do you want to promote your piece to?")
                             println("1. Queen, 2. Knight 3. Rook 4. Bishop")

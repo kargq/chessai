@@ -1,27 +1,14 @@
 package pieces
 
 import Board
-import shared.debugln
+import Move
+import Tile
 
 class Rook(black: Boolean = false) : Piece(black) {
 
-    fun getHasMoved(board: Board): Boolean {
-        return if (black) {
-            board.blackRookMoved
-        } else {
-            board.whiteRookMoved
-        }
-    }
-
-    fun setHasMoved(board: Board, value: Boolean) {
-        if (black) {
-            board.blackRookMoved = value
-        } else {
-            board.whiteRookMoved = value
-        }
-    }
-
-    override fun validMove(board: Board, start: Tile, end: Tile): Boolean {
+    override fun checkPieceMoveConstraints(board: Board, move: Move): Boolean {
+        val start = board.getTile(move.getStart())
+        val end = board.getTile(move.getEnd())
         if (validStartEnd(start, end)) return when {
             onlyHorizontal(
                 start,
@@ -50,20 +37,16 @@ class Rook(black: Boolean = false) : Piece(black) {
         return false
     }
 
-    override fun getCopy(): Rook {
+    override fun copyPiece(): Rook {
         return Rook(black)
     }
 
-    override fun makeMove(board: Board, move: Move) {
-        val flag = validMove(board, move)
+    override fun movePiece(board: Board, move: Move) {
         if (checkRookCastling(board, board.getTile(move.getStart()), board.getTile(move.getEnd()))) {
             val king = board.getTile(move.getEnd()).piece!! as King
-            king.makeMove(board, move)
+            king.movePiece(board, move)
         } else {
-            super.makeMove(board, move)
-        }
-        if (getHasMoved(board)) {
-            setHasMoved(board, flag)
+            super.movePiece(board, move)
         }
     }
 

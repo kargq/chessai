@@ -12,7 +12,7 @@ fun debugln(umm: Any = "") {
         println("DEBUG:/ $umm")
 }
 
-var aienabled = true
+var aienabled = false
 
 fun debugai(umm: Any = "") {
     if (aienabled)

@@ -1,6 +1,7 @@
 import pieces.*
 import shared.*
 import java.io.InputStream
+import java.lang.Exception
 import java.util.*
 
 /*
@@ -27,6 +28,10 @@ y x->
 7
 
  */
+
+val blackCheckMateCache: LRUCacheMap<String, Boolean> = LRUCacheMap(100000)
+val whiteCheckMateCache: LRUCacheMap<String, Boolean> = LRUCacheMap(100000)
+
 class Board(
     private val startArray: List<List<Piece?>> = listOf(
         listOf(
@@ -74,18 +79,25 @@ class Board(
             Rook()
         )
     ),
-    var whiteKingMoved: Boolean = false,
-    var blackKingMoved: Boolean = false,
-    var whiteRookMoved: Boolean = false,
-    var blackRookMoved: Boolean = false,
-    // Not null if pawn skipped a position the last position on the board, stores the position it skipped from
-    var pawnSkip: BoardPosition? = null,
     var blackPlayerTurn: Boolean = false
 ) {
 
-
     private val grid: List<List<Tile>>
+    var kingInCheck = false
+    var kingInCheckMate = false
+    var stalemate = false
+    private var allValidMoves: List<Move>? = null
 
+    fun getCopy(): Board {
+        val result = Board(
+            getPieceArray(),
+            blackPlayerTurn = blackPlayerTurn
+        )
+        result.kingInCheckMate = kingInCheckMate
+        result.kingInCheck = kingInCheck
+        result.allValidMoves = allValidMoves?.map { Move(it) }
+        return result
+    }
 
     init {
         val tempGrid: MutableList<List<Tile>> = mutableListOf()
@@ -97,48 +109,21 @@ class Board(
             tempGrid.add(currRow)
         }
         grid = tempGrid
-        debug(getParseableStateString())
     }
 
-    fun getParseableStateString(): String {
-        var result = ""
-        for (y in 0..7) {
-            for (x in 0..7) {
-                result += "${getPieceString(getTile(x, y).piece)} "
+
+    fun getAllNextValidMoves(): List<Move> {
+        if (allValidMoves == null) {
+            val result = mutableListOf<Move>()
+            forAllPieceConstraintValidMoves(blackPlayerTurn) { move ->
+                result.add(move)
             }
-            result += "\n"
+            allValidMoves = result
+            println("\n==== \n\n\n SHOULD ONLY HAPPEN ONCE A GAME \n\n\n ===\n")
         }
-        result += " $whiteKingMoved "
-        result += " $blackKingMoved "
-        result += " $whiteRookMoved "
-        result += " $blackRookMoved "
-        result += " $blackPlayerTurn "
-        if (pawnSkip != null) {
-            result += " ${pawnSkip!!.x} "
-            result += " ${pawnSkip!!.y} "
-        } else {
-            result += " -1 -1 "
-        }
-        result += "\n"
-        return result
+        return allValidMoves!!
     }
 
-    fun getPieceString(piece: Piece?): String {
-        return if (piece == null) "x  " else piece.toString()
-    }
-
-    fun getCopy(): Board {
-        val result = Board(
-            getPieceArray(),
-            whiteKingMoved = whiteKingMoved,
-            blackKingMoved = blackKingMoved,
-            whiteRookMoved = whiteRookMoved,
-            blackRookMoved = blackRookMoved,
-            pawnSkip = pawnSkip?.let { BoardPosition(it.x, it.y) }
-        )
-        debug("Original: ${this.getParseableStateString()}, Copied: ${result.getParseableStateString()}")
-        return result
-    }
 
     fun getPieceArray(): List<List<Piece?>> {
         return grid.map { it.map { tile -> tile.piece?.getCopy() } }
@@ -164,7 +149,7 @@ class Board(
 
     override fun toString(): String {
         var result = ""
-        result += "  0   1   2   3   4   5   6   7\n"
+        result += "  0          1          2          3          4          5          6          7\n"
         for (y in 0..7) {
             result += "$y "
             for (x in 0..7) {
@@ -172,7 +157,7 @@ class Board(
             }
             result += "\n"
         }
-        return "$result===\nBoard state(parseable by this program):-\n ${getParseableStateString()}"
+        return result
     }
 
     fun getAllPieceTiles(black: Boolean): List<Tile> {
@@ -180,13 +165,11 @@ class Board(
         for (x in 0..7) {
             for (y in 0..7) {
                 val currTile = getTile(x, y)
-//                debug("Get tile $currTile")
                 if (!currTile.empty()) {
                     currTile.piece?.let {
                         if (it.black == black) {
                             result.add(currTile)
                         } else {
-//                            debug("Don't add tile $currTile, not ${getColorText(black)}")
                         }
                     }
                 }
@@ -217,57 +200,37 @@ class Board(
     }
 
     fun getKingTile(black: Boolean): Tile? {
-//        debugln("Get king for $this")
-//        debugln()
         forAllPieceTiles(black) { tile, piece ->
-            //            debug(" $tile ")
             if (piece is King) {
                 return tile
             }
         }
-//        debugln()
         return null
     }
 
-    fun isKingInCheckmate(black: Boolean): Boolean {
-        val states = generateAllBoardStates(black)
-        debug(states)
-        for ((index, state) in states.withIndex()) {
-            debug("Checking state $index")
-            if (!state.isKingInCheck(black)) {
-                debug("${getColorText(black)} KING is not on check, board state $state \n at $index for \n ${this}")
-                return false
-            }
-        }
-        debug("${getColorText(black)} KING is on check \n ${this}")
-        return true
-    }
+    fun checkmatePlayer() {
+        if(kingInCheckMate) {
 
-    inline fun forAllValidMoves(black: Boolean, callback: (move: Move) -> Unit) {
+        }
+    }
+    inline fun forAllPieceConstraintValidMoves(black: Boolean, callback: (move: Move) -> Unit) {
         forAllPieceTiles(black) { tile, piece ->
-            for (move in piece.generateAllValidMoves(this, tile)) {
+            piece.forAllValidMovesFromPiece(this, tile) { move ->
                 callback(move)
             }
         }
     }
 
-    fun isKingInCheckmate(): Boolean {
-        return isKingInCheckmate(false) || isKingInCheckmate(true)
-    }
-
-
-    fun isKingInStalemate(black: Boolean): Boolean {
-
+    fun isKingInStalemateDelegate(black: Boolean): Boolean {
         val kingTile = getKingTile(black)
         if (kingTile != null) {
-            if (!isKingInCheck(black)) {
-                // It's not currently in check, but everything else should be a check around it.
+            if (!kingInCheck) {
+                // It's not currently in check, but everything else should be in check around it.
                 var numValidMoves = 0
-                forAllValidMoves(black) { move ->
+                forAllPieceConstraintValidMoves(black) { move ->
                     numValidMoves++
-                    val newBoard = getCopy()
-                    newBoard.executeMove(move)
-                    if (!newBoard.isKingInCheck(black)) {
+                    if (!moveLeadsToOwnCheck(move)) {
+                        // If all moves lead to king being in a check, it's a stalemate.
                         return false
                     }
                 }
@@ -278,105 +241,142 @@ class Board(
         } else return false
     }
 
-    fun executeMove(move: Move) {
-        getTile(move.getStart()).piece?.let {
-            it.makeMove(this, move)
+
+
+    fun executeMove(move: Move): Boolean {
+        if (!kingInCheckMate) {
+            getTile(move.getStart()).piece?.let {
+                if (it.checkPieceMoveConstraints(this, move)) {
+                    // can't do a move that leads to a check.
+                    // if in check, cannot do any move that does not change this.
+                    // Both should be handled by saying that the next move cannot put current king in check.
+                    if (!moveLeadsToOwnCheck(move)) {
+                        it.movePiece(this, move)
+                        // Check if this move put opponent king in check.
+                        kingInCheck = false
+                        kingInCheckMate = false
+                        forAllPieceTiles(blackPlayerTurn) { tile, piece ->
+                            getKingTile(!blackPlayerTurn)?.let { opponentKingTile ->
+                                if (piece.checkPieceMoveConstraints(this, Move(tile, opponentKingTile))) {
+                                    // Can move one of own pieces to opponent king, put opponent in check.
+//                                println("King in check because ${Move(tile, opponentKingTile)}")
+                                    kingInCheck = true
+                                    return@forAllPieceTiles
+                                }
+                            }
+                        }
+                        blackPlayerTurn = !blackPlayerTurn
+
+                        // Generate all the next possible board states. Only add ones that don't lead to own check.
+                        val newAllValidMoves = mutableListOf<Move>()
+                        forAllPieceTiles(blackPlayerTurn) { tile, piece ->
+                            piece.forAllValidMovesFromPiece(this, tile) { move ->
+                                // Generate all possible next states, if any of them lead to a 'not own check', it's not a checkmate.
+                                // Also add the ones that don't have a 'own heck' to preserve all next possible board states.
+//                                println("Checking move $move")
+                                val boardCopy = getCopy()
+                                if (!boardCopy.moveLeadsToOwnCheck(move)) {
+                                    // Not a Checkmate as soon as it gets here.
+//                                    newAllBoardStates.add(boardCopy)
+//                                    println("Valid, not checkmate.")
+                                    newAllValidMoves.add(move)
+                                }
+                            }
+                        }
+
+//                        allBoardStates = newAllBoardStates
+                        allValidMoves = newAllValidMoves
+
+                        if (kingInCheck) {
+                            // Check if new player is in checkmate
+                            // If there's plausible next states, it's not a checkmate.
+//                            println("Will be setting checkmate in this step, is king in check? $kingInCheck. Moves size: ${newAllValidMoves.size}")
+                            kingInCheckMate = (newAllValidMoves.size == 0)
+                        } else {
+                            // Check stalemate
+                            stalemate =
+                                isKingInStalemateDelegate(!blackPlayerTurn) || isKingInStalemateDelegate(blackPlayerTurn)
+                        }
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            }
         }
+        return false
+
     }
 
-    fun isKingInStalemate(): Boolean {
-        return isKingInStalemate(true) || isKingInStalemate(false)
-    }
-
-    fun isPositionCheck(pos: BoardPosition, checkAgainstBlack: Boolean): Boolean {
-        // Only works when pos is empty or pos is opponent .
-        // Could pass in new board if this does not work.
-        val startTiles = getAllPieceTiles(!checkAgainstBlack)
-        val endTile = getTile(pos)
-//        debug("Start tiles being checked to have a move towards ${endTile}, checking if ${getKingTile(checkAgainstBlack)} is under check. \n $startTiles")
-        // Check if any of the start tiles has a valid move to endTile
-        for (startTile in startTiles) {
-            startTile.piece?.let { piece ->
-                //                debug("Check valid move from $startTile to $endTile")
-                if (piece.validMove(this, startTile, endTile)) return true
-//                debug("No valid move from $startTile to $endTile")
+    fun moveLeadsToOwnCheck(move: Move): Boolean {
+        val boardCopy = getCopy()
+        // Do this move without any checks on a copy of this board.
+        val copyStart = boardCopy.getTile(move.getStart())
+        copyStart.piece?.let {
+            it.movePiece(boardCopy, move)
+            val copyEndKingTile = boardCopy.getKingTile(blackPlayerTurn)!!
+            forAllPieceTiles(!blackPlayerTurn) { tile, piece ->
+                if (piece.checkPieceMoveConstraints(boardCopy, Move(tile, copyEndKingTile))) {
+                    // Can move opponent piece to king following this move, check possible.
+                    return true
+                }
             }
         }
         return false
     }
 
-    fun isKingInCheck(black: Boolean): Boolean {
-//        debug("Check if ${getColorText(black)} king is in check")
-        val king = getKingTile(black)
-        if (king != null) {
-            val result = isPositionCheck(king, black)
-            if (!result) {
-//            debug("King is not in check for $this")
-            }
-            return result
-        } else {
-            return true
-        }
-    }
-
-    fun generateAllBoardStates(black: Boolean): List<Board> {
-        val result = mutableListOf<Board>()
-        forAllPieceTiles(black) { tile, piece ->
-            piece.generateAllValidMoves(this, tile).forEach { move ->
-                val newBoard = getCopy()
-                newBoard.executeMove(move)
-                // don't add if own king is put in check by the move
-                if (!newBoard.isKingInCheck(black)) result.add(newBoard)
-            }
-        }
-        return result
-    }
 }
 
 fun withinBounds(xory: Int): Boolean {
     return xory in (0..7)
 }
 
+fun withinBounds(vararg xory: Int): Boolean {
+    for (arg in xory) {
+        if (!withinBounds(arg)) return false
+    }
+    return true
+}
+
+
 fun constructBoardFromInput(inp: InputStream): Board {
 
     // Parse pieces
     val input: Scanner = Scanner(inp)
-    val pieces: MutableList<List<Piece?>> = mutableListOf()
-    for (rIndex in 0..7) {
-        val currRow = mutableListOf<Piece?>()
-        for (cIndex in 0..7) {
-            currRow.add(stringToPiece(input.next()))
-        }
-        pieces.add(currRow)
+    val board = Board()
+
+    println(board)
+    var move = scanMove(input)
+
+    while (move != null) {
+        board.executeMove(move)
+        println(board)
+        move = scanMove(input)
     }
-    println("Has white king moved from start position? (true/false)")
-    val whiteKingMoved: Boolean = input.nextBoolean()
-    println("Has black king moved from start position? (true/false)")
-    val blackKingMoved: Boolean = input.nextBoolean()
-    println("Has white rook moved from start position? (true/false)")
-    val whiteRookMoved: Boolean = input.nextBoolean()
-    println("Has black rook moved from start position? (true/false)")
-    val blackRookMoved: Boolean = input.nextBoolean()
-    println("Is Black Player's turn? (true/false)")
-    val blackPlayerTurn: Boolean = input.nextBoolean()
-    var pawnSkip: BoardPosition? = null
-
-    println("If a pawn has skipped it's position in the last move, enter x and y, else just enter -1 for both. ")
-    println("x: ")
-    var x = input.nextInt()
-    println("y: ")
-    var y = input.nextInt()
-
-    if(x in 0..7 && y in 0..7) {
-        pawnSkip = BoardPosition(x, y)
-    }
-
-    println("Board constructed from standard input!")
-    return Board(pieces, whiteKingMoved, blackKingMoved, whiteRookMoved, blackRookMoved, pawnSkip, blackPlayerTurn)
+    println(board)
+    println("Done!")
+    return board
 }
 
-fun constructBoardFromInput(str: String): Board {
-    return constructBoardFromInput(stringInputStream(str))
+fun scanMove(inp: Scanner): Move? {
+    return try {
+        println("Enter start position. (Can just be in format startX, startY, endX, endY, e.g. 5 6 5 5). ")
+        println("Enter DONE when done.")
+        println("Start X: ")
+        val sx = inp.nextInt()
+        println("Start Y: ")
+        val sy = inp.nextInt()
+        println("End X: ")
+        val ex = inp.nextInt()
+        println("End Y: ")
+        val ey = inp.nextInt()
+
+        return if (withinBounds(sx, sy, ex, ey)) {
+            Move(sx, sy, ex, ey)
+        } else null
+    } catch (e: Exception) {
+        null
+    }
 }
 
 fun stringInputStream(str: String): InputStream {

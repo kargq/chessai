@@ -1,15 +1,21 @@
 package pieces
 
 import Board
-import shared.*
+import BoardPosition
+import Move
+import Tile
 import withinBounds
 import kotlin.math.abs
 
 
 class Pawn(black: Boolean = false) : Piece(black) {
 
+    // The first move was a 2 forward
+    var hasSkipped = false
 
-    override fun validMove(board: Board, start: Tile, end: Tile): Boolean {
+    override fun checkPieceMoveConstraints(board: Board, move: Move): Boolean {
+        val start = board.getTile(move.getStart())
+        val end = board.getTile(move.getEnd())
         if (!validStartEnd(start, end)) return false
         val startPiece = start.piece!!
         val diff = end.y - start.y
@@ -17,84 +23,66 @@ class Pawn(black: Boolean = false) : Piece(black) {
         if (validStartEnd(start, end)) {
             when {
                 onlyVertical(start, end) -> {
-                    if(end.empty() && checkVerticalUnblocked(board, start, end)) {
+                    if (end.empty() && checkVerticalUnblocked(
+                            board,
+                            start,
+                            end
+                        )
+                    ) {
                         val allowedDiff = direction * if (startTile(start)) 2 else 1
-                        return (diff == allowedDiff || diff == direction )
+                        return (diff == allowedDiff || diff == direction)
                     }
                 }
                 onlyDiagonal(start, end) -> {
                     // Handle normal kill move
-                    if (opppnents(start, end) && diff == direction) {
-                        return true
-                    }
-                    // check en passant
-                    // if previous move skipped the current captureable position, do it
-                    return checkEnPassant(board, start, end)
+                    return diff == direction && !end.empty()
                 }
             }
         }
         return false
     }
 
-    override fun getCopy(): Piece {
-        return Pawn(black)
+    override fun copyPiece(): Piece {
+        val result = Pawn(black)
+        result.hasSkipped = hasSkipped
+        return result
     }
 
-    fun atStartPosition(tile: Tile): Boolean {
+    private fun atStartPosition(tile: Tile): Boolean {
         return (black && tile.y == 1) || (!black && tile.y == 6)
     }
 
     /**
      * Always call from start piece
      */
-    override fun makeMove(board: Board, move: Move) {
+    override fun movePiece(board: Board, move: Move) {
         val start: Tile = board.getTile(move.getStart())
         val end: Tile = board.getTile(move.getEnd())
-        val passant = checkEnPassant(board, start, end)
 
-        val passantPos = board.pawnSkip
+        end.piece = start.piece
+        start.piece = null
 
-        if (validMove(board, start, end)) {
-            start.piece?.let {
-                if (atStartPosition(start)) {
-                    board.pawnSkip = getPassantPos(start.x)
-                } else {
-                    board.pawnSkip = null
-                }
-            }
-            end.piece = start.piece
-            start.piece = null
-
-            if(black) {
-                if(end.y == 7) {
+        if (checkEnPassant(board, start, end)) {
+            val passantPos = BoardPosition(end.x, if (black) 3 else 4)
+            board.setPiece(passantPos, null)
+        } else {
+            // Handle promotion
+            if (black) {
+                if (end.y == 7) {
                     // Promote
                     board.setPiece(end, move.getNewPromotionPiece(black))
                 }
             } else {
-                if(end.y == 0) {
+                if (end.y == 0) {
                     // Promote
                     board.setPiece(end, move.getNewPromotionPiece(black))
                 }
             }
         }
 
-
-
-        if (passant) board.setPiece(passantPos!!, null)
+        hasMoved = true
     }
 
-    fun getPassantPos(x: Int): BoardPosition {
-        return BoardPosition(x, if (black) 3 else 4)
-    }
-
-
-
-    private fun getSkippedOpponentX(x: Int): List<Int> {
-        val result: MutableList<Int> = mutableListOf()
-        if (withinBounds(x - 1)) result.add(x - 1)
-        if (withinBounds(x + 1)) result.add(x + 1)
-        return result
-    }
 
     private fun startTile(tile: Tile): Boolean {
         return if (black) {
@@ -104,27 +92,22 @@ class Pawn(black: Boolean = false) : Piece(black) {
         }
     }
 
+    private fun canKillPassedY(black: Boolean): Int {
+        return if (black) {
+            4
+        } else {
+            3
+        }
+    }
+
     private fun checkEnPassant(board: Board, start: Tile, end: Tile): Boolean {
-        val diff = end.y - start.y
-        // check en passant
-        // if previous move skipped the current captureable position, do it
-        if (abs(diff) == 1) {
-            if (board.pawnSkip != null) {
-                val skippedPawnTile = board.getTile(board.pawnSkip!!)
-                if (skippedPawnTile.piece != null) {
-                    val piece = skippedPawnTile.piece
-                    if (piece is Pawn) {
-                        // We know the piece is a pawn
-                        // Check start pos x against this position
-                        if (abs(start.x - skippedPawnTile.x) == 1 && start.y == skippedPawnTile.y && skippedPawnTile.x == end.x) {
-                            // There's a skipped piece
-                            // It is captureable in the next move
-                            // next move is indeed trying capture
-                            return true
-                        }
-                    }
-                }
-            }
+        if (abs(start.x - end.x) == 1 && abs(start.y - end.y) == 1 && canKillPassedY(black) == start.y) {
+            val endPassantTile = if (withinBounds(end.x)) board.getTile(end.x, start.y) else null
+
+            return (endPassantTile != null && endPassantTile.piece is Pawn && opppnents(
+                start,
+                endPassantTile
+            ) && (endPassantTile.piece as Pawn).hasSkipped)
         }
         return false
     }

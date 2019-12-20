@@ -1,10 +1,14 @@
 package pieces
 
 import Board
+import Move
+import Tile
 import kotlin.math.abs
 
 class Knight(black: Boolean = false) : Piece(black) {
-    override fun validMove(board: Board, start: Tile, end: Tile): Boolean {
+    override fun checkPieceMoveConstraints(board: Board, move: Move): Boolean {
+        val start = board.getTile(move.getStart())
+        val end = board.getTile(move.getEnd())
         return validStartEnd(start, end) && checkValidShhift(start, end)
     }
 
@@ -22,7 +26,7 @@ class Knight(black: Boolean = false) : Piece(black) {
         }
     }
 
-    override fun getCopy(): Knight {
+    override fun copyPiece(): Knight {
         return Knight(black)
     }
 

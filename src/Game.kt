@@ -1,4 +1,3 @@
-import pieces.Move
 import shared.debug
 import shared.getColorText
 import java.lang.Exception
@@ -8,14 +7,6 @@ class Game(
     val blackPlayer: Player = ConsolePlayer(true),
     val whitePlayer: Player = ConsolePlayer(false)
 ) {
-
-    var blackTurn: Boolean
-    get() {
-        return board.blackPlayerTurn
-    }
-    set(value){
-        board.blackPlayerTurn = value
-    }
 
     init {
 
@@ -38,29 +29,29 @@ class Game(
     }
 
     fun nextMove() {
-        debug("Check checkmate and shit")
-        debug(board.isKingInCheckmate(true))
-        debug(board.isKingInCheckmate(false))
+        sendBothAMessage("=============================")
+
         when {
-            board.isKingInCheckmate(true) -> {
+            board.kingInCheckMate && board.blackPlayerTurn -> {
                 sendBothAMessage(board)
                 sendBothAMessage("Checkmate, White wins!")
                 gameState = GameState.WIN_WHITE
             }
-            board.isKingInCheckmate(false) -> {
+            board.kingInCheckMate && !board.blackPlayerTurn -> {
                 sendBothAMessage(board)
                 sendBothAMessage("Checkmate, Black wins!")
                 gameState = GameState.WIN_BLACK
             }
-            board.isKingInStalemate() -> {
+            board.stalemate -> {
                 sendBothAMessage(board)
                 sendBothAMessage("Stalemate, it's a draw!")
                 gameState = GameState.STALEMATE
             }
             else -> {
+                if(board.kingInCheck) sendBothAMessage("${getColorText(board.blackPlayerTurn)} King in check")
                 sendBothAMessage(board)
-                sendBothAMessage("Turn: ${getColorText(blackTurn)}")
-                if (!blackTurn) {
+                sendBothAMessage("Turn: ${getColorText(board.blackPlayerTurn)}")
+                if (!board.blackPlayerTurn) {
                     whitePlayer.determineNextMove(board) { move: Move ->
                         makeMove(whitePlayer, move)
                     }
@@ -74,45 +65,22 @@ class Game(
     }
 
 
-    fun makeMove(player: Player, move: Move): Boolean {
+    fun makeMove(player: Player, move: Move) {
         val startX = move.startX
         val startY = move.startY
         val endX = move.endX
         val endY = move.endY
-        println("Move from ($startX, $startY) to ($endX, $endY)")
-        if (withinBounds(startX) && withinBounds(startY) && withinBounds(endX) && withinBounds(endY))
-            board.getTile(startX, startY).piece?.let {
-                val startTile = board.getTile(startX, startY)
-                val endTile = board.getTile(endX, endY)
-                println("Moving tile $it from ")
-                if (validPlayerMove(player, startX, startY, endX, endY)) {
-                    it.makeMove(board, Move(startTile, endTile))
-                    blackTurn = !blackTurn
-                } else {
-                    sendBothAMessage("Invalid move, please retry.")
-                    if (blackTurn) blackPlayer.sendMessage("Invalid move by blackPlayer, try again!")
-                    else whitePlayer.sendMessage("Invalid move by whitePlayer, try again!")
-                }
-            }
-        return false
-    }
-
-    fun validPlayerMove(player: Player, startX: Int, startY: Int, endX: Int, endY: Int): Boolean {
-        if (player.black == blackTurn) {
-            // Check check resolution
-            val boardCopy = board.getCopy()
-            boardCopy.executeMove(Move(startX, startY, endX, endY))
-            // Can't result in a check.
-            if(!boardCopy.isKingInCheck(blackTurn)) {
-                val startTile = board.getTile(startX, startY)
-                val endTile = board.getTile(endX, endY)
-                startTile.piece?.let {
-                    if (it.black != blackTurn) return false
-                    if (it.validMove(board, startTile, endTile)) return true
-                }
+        sendBothAMessage("Move $move")
+        if (withinBounds(startX) && withinBounds(startY) && withinBounds(endX) && withinBounds(endY)) {
+            val startTile = board.getTile(startX, startY)
+            val endTile = board.getTile(endX, endY)
+            sendBothAMessage("${getColorText(board.blackPlayerTurn)} $startTile $move")
+            if (!board.executeMove(move)) {
+                sendBothAMessage("Invalid move, please retry.")
+                if (board.blackPlayerTurn) blackPlayer.sendMessage("Invalid move by blackPlayer, try again!")
+                else whitePlayer.sendMessage("Invalid move by whitePlayer, try again!")
             }
         }
-        return false
     }
 
     fun sendBothAMessage(mgs: Any) {

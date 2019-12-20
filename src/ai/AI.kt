@@ -1,8 +1,10 @@
-package AI
+package ai
 
 import Board
 import Game
+import Move
 import Player
+import Tile
 import pieces.*
 import shared.*
 import kotlin.math.*
@@ -99,10 +101,22 @@ fun getWeight(tile: Tile, black: Boolean): Int {
         else -> blank
     }
 
-    return if (black) {
+    val positionResult = if (black) {
         // Flip lookup
         lookupAt(lookupFrom, tile.x, (7 - tile.y))
     } else lookupAt(lookupFrom, tile.x, tile.y)
+
+    val weight = when (tile.piece) {
+        is King -> KING_WEIGHT
+        is Queen -> QUEEN_WEIGHT
+        is Pawn -> PAWN_WEIGHT
+        is Knight -> KNIGHT_WEIGHT
+        is Bishop -> BISHOP_WEIGHT
+        is Rook -> ROOK_WEIGHT
+        else -> 1
+    }
+
+    return weight * positionResult
 }
 
 class AIPlayer(black: Boolean, val print: Boolean = false, val ply: Int = 3) : Player(black) {
@@ -119,7 +133,7 @@ class AIPlayer(black: Boolean, val print: Boolean = false, val ply: Int = 3) : P
     }
 }
 
-const val KING_WEIGHT = 10
+const val KING_WEIGHT = 10 // Checkmate really handles king
 const val QUEEN_WEIGHT = 90
 const val BISHOP_WEIGHT = 30
 const val ROOK_WEIGHT = 50
@@ -129,23 +143,23 @@ const val PAWN_WEIGHT = 10
 fun determineMove(board: Board, black: Boolean, ply: Int = 3): Move {
     debugai("Determine move for ${getColorText(black)}")
     var bestHeur = Integer.MIN_VALUE
-    var result: Move = Move(-1, -1, -1, -1)
-    board.forAllPieceTiles(black) { tile, piece ->
-        for (move in piece.generateAllValidMoves(board, tile)) {
-            val boardState = board.getCopy()
-            boardState.executeMove(move)
-            if(!boardState.isKingInCheck(black)) {
-                val currHeur =
-                    alphabeta(boardState, ply, AlphaBetaStore(), blackMove = !black, black = black, maxPlayer = false)
-                debugai("$currHeur, $move")
-                if (currHeur > bestHeur) {
-                    bestHeur = currHeur
-                    result = move
-                }
-            }
+    var result = Move(-1, -1, -1, -1)
+    val validMoves = board.getAllNextValidMoves()
+    val ab = AlphaBetaStore()
+    for (i in validMoves.indices) {
+        // TODO: See if I need the copy
+        val boardState = board.getCopy()
+        val move = validMoves[i]
+        boardState.executeMove(move)
+        val currHeur =
+            alphabeta(boardState, ply, ab, heuristicPlayerBlack = black, maxPlayer = false)
+        debugai("$currHeur, $move")
+        if (currHeur > bestHeur) {
+            bestHeur = currHeur
+            result = move
         }
     }
-
+    println("Result $result")
     return result
 }
 
@@ -155,97 +169,86 @@ data class AlphaBetaStore(
     var beta: Int = Integer.MAX_VALUE
 )
 
-fun alphabeta(board: Board, ply: Int, ab: AlphaBetaStore, black: Boolean, blackMove: Boolean, maxPlayer: Boolean): Int {
-    if (ply == 0 || board.isKingInCheckmate(false) ||
-        board.isKingInCheckmate(true) || board.isKingInStalemate()
+fun alphabeta(board: Board, ply: Int, ab: AlphaBetaStore, heuristicPlayerBlack: Boolean, maxPlayer: Boolean): Int {
+    if (ply == 0 || board.kingInCheckMate || board.stalemate
     ) {
-        return heuristic(board, black)
+        return heuristic(board, heuristicPlayerBlack)
     }
     if (maxPlayer) {
         var value = Integer.MIN_VALUE
-        board.forAllPieceTiles(blackMove) { tile, piece ->
-            for (move in piece.generateAllValidMoves(board, tile)) {
-                // For all possible moves for player,
-                val childBoard = board.getCopy()
-                childBoard.executeMove(move)
-                value = max(value, alphabeta(childBoard, ply - 1, ab, black, !blackMove, false))
-                ab.alpha = max(ab.alpha, value)
-                if (ab.alpha >= ab.beta) {
-//                    println("Eliminated, ${ab.alpha} ${ab.beta}")
-                    return@forAllPieceTiles
-                }
+        for ((index, move) in board.getAllNextValidMoves().withIndex()) {
+            // For all possible moves for player,
+            val childBoard = board.getCopy()
+            childBoard.executeMove(move)
+            value = max(value, alphabeta(childBoard, ply - 1, ab, heuristicPlayerBlack, false))
+//            println("Info at $index of ${board.getAllNextValidMoves().size} at ply ${ply} abstore: ${ab} hash: ${System.identityHashCode(ab)}")
+            ab.alpha = max(ab.alpha, value)
+            if (ab.alpha >= ab.beta) {
+                println("Max skipping at $index of ${board.getAllNextValidMoves().size} at ply ${ply} abstore: ${ab} hash: ${System.identityHashCode(ab)}")
+                break
             }
         }
         return value
     } else {
         var value = Integer.MAX_VALUE
-        board.forAllPieceTiles(blackMove) { tile, piece ->
-            piece.generateAllValidMoves(board, tile).forEach { move ->
-                val childBoard = board.getCopy()
-                childBoard.executeMove(move)
-                value = min(value, alphabeta(childBoard, ply - 1, ab, black, !blackMove, true))
-                ab.beta = min(ab.beta, value)
-                if (ab.alpha >= ab.beta) {
-//                    println("Eliminated, ${ab.alpha} ${ab.beta}")
-                    return@forAllPieceTiles
-                }
+        for ((index, move) in board.getAllNextValidMoves().withIndex()) {
+            val childBoard = board.getCopy()
+            childBoard.executeMove(move)
+            value = min(value, alphabeta(childBoard, ply - 1, ab, heuristicPlayerBlack, true))
+//            println("Info at $index of ${board.getAllNextValidMoves().size} at ply ${ply} abstore: ${ab} hash: ${System.identityHashCode(ab)}")
+            ab.beta = min(ab.beta, value)
+            if (ab.alpha >= ab.beta) {
+                println("Max skipping at $index of ${board.getAllNextValidMoves().size} at ply ${ply} abstore: ${ab} hash: ${System.identityHashCode(ab)}")
+                break
             }
         }
         return value
     }
 }
 
-
+/**
+ * The actual evaluation function
+ */
 fun heuristic(board: Board, black: Boolean): Int {
-
     var value = 0
 
     board.forAllPieceTiles(black) { tile, piece ->
-        //        when {
-//            piece is King -> value += KING_WEIGHT
-//            piece is Queen -> value += QUEEN_WEIGHT
-//            piece is Bishop -> value += BISHOP_WEIGHT
-//            piece is Knight -> value += KNIGHT_WEIGHT
-//            piece is Rook -> value += ROOK_WEIGHT
-//            piece is Pawn -> value += PAWN_WEIGHT
-//        }
         value += getWeight(tile, black)
     }
 
     board.forAllPieceTiles(!black) { tile, piece ->
-        //        when {
-//            piece is King -> value -= KING_WEIGHT
-//            piece is Queen -> value -= QUEEN_WEIGHT
-//            piece is Bishop -> value -= BISHOP_WEIGHT
-//            piece is Knight -> value -= KNIGHT_WEIGHT
-//            piece is Rook -> value -= ROOK_WEIGHT
-//            piece is Pawn -> value -= PAWN_WEIGHT
-//        }
-        value -= getWeight(tile, black)
+        value -= getWeight(tile, !black)
 
     }
 
-    val playerInCheckmate = board.isKingInCheckmate(black)
+    val playerInCheckmate = board.kingInCheckMate && board.blackPlayerTurn == black
+    val playerInCheck = board.kingInCheck && board.blackPlayerTurn == black
 
-    val opponentInCheckmate = board.isKingInCheckmate(!black)
+    val opponentInCheckmate = board.kingInCheckMate && board.blackPlayerTurn != black
+    val opponentInCheck = board.kingInCheck && board.blackPlayerTurn != black
 
 
     if (playerInCheckmate) {
         debugai("${getColorText(black)} in checkmate")
-        value -= 1000
+        value -= 10000
     }
     if (opponentInCheckmate) {
-        debugai("${getColorText(black)} in checkmate")
-        value += 1000
+        debugai("${getColorText(!black)} in checkmate")
+        value += 10000
     }
 
-//    debugai("Heuristic for ${getColorText(black)} is ${value}")
+    if (playerInCheck) {
+        value -= 500
+    }
+
+    if (opponentInCheck) {
+        value += 500
+    }
+
     return value
 }
 
 fun main() {
     val game = Game(whitePlayer = AIPlayer(false, ply = 2), blackPlayer = AIPlayer(true, print = true, ply = 0))
-//    val game = Game(whitePlayer = AIPlayer(false))
-//    val game = Game(blackPlayer = AIPlayer(true))
     game.startGameLoop()
 }

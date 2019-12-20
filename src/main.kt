@@ -1,4 +1,4 @@
-import AI.AIPlayer
+import ai.AIPlayer
 import java.lang.Exception
 import java.util.*
 
@@ -38,19 +38,24 @@ fun main() {
             game.startGameLoop()
 
         } catch (e: Exception) {
-            println("Invalid input, please try again.")
+            e.printStackTrace()
+            println("Something went wrong. It's likely to be invalid input, please try again.")
         }
+        println("Game finished. enter START to start a new one.")
         currInput = input.next()
     }
 }
 
 fun selectPlayer(input: Scanner, black: Boolean, player1: Player? = null): Player {
-    println("1. AI 2. Console")
+    println("1. ai 2. Console")
     val option = input.nextInt()
     when (option) {
         1 -> {
             println("Select ply(>0): ")
-            val ply = input.nextInt() + 1 // does evaluate the next one layer at 0
+            var ply = input.nextInt() - 1 // does evaluate the next one layer at 0
+            if(ply <=0) {
+                ply = 1
+            }
             return AIPlayer(black, print = player1 is AIPlayer, ply = ply)
         }
         2 -> {
