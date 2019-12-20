@@ -141,7 +141,7 @@ const val KNIGHT_WEIGHT = 30
 const val PAWN_WEIGHT = 10
 
 fun determineMove(board: Board, black: Boolean, ply: Int = 3): Move {
-    debugai("Determine move for ${getColorText(black)}")
+    println("Determine move for ${getColorText(black)} ${ply}")
     var bestHeur = Integer.MIN_VALUE
     var result = Move(-1, -1, -1, -1)
     val validMoves = board.getAllNextValidMoves()
@@ -152,7 +152,7 @@ fun determineMove(board: Board, black: Boolean, ply: Int = 3): Move {
         val move = validMoves[i]
         boardState.executeMove(move)
         val currHeur =
-            alphabeta(boardState, ply, ab, heuristicPlayerBlack = black, maxPlayer = false)
+            alphabeta(boardState, ply, Int.MIN_VALUE, Int.MAX_VALUE, heuristicPlayerBlack = black, maxPlayer = false)
         debugai("$currHeur, $move")
         if (currHeur > bestHeur) {
             bestHeur = currHeur
@@ -169,7 +169,9 @@ data class AlphaBetaStore(
     var beta: Int = Integer.MAX_VALUE
 )
 
-fun alphabeta(board: Board, ply: Int, ab: AlphaBetaStore, heuristicPlayerBlack: Boolean, maxPlayer: Boolean): Int {
+fun alphabeta(board: Board, ply: Int, _alpha: Int, _beta: Int, heuristicPlayerBlack: Boolean, maxPlayer: Boolean): Int {
+    var alpha = _alpha
+    var beta = _beta
     if (ply == 0 || board.kingInCheckMate || board.stalemate
     ) {
         return heuristic(board, heuristicPlayerBlack)
@@ -180,11 +182,9 @@ fun alphabeta(board: Board, ply: Int, ab: AlphaBetaStore, heuristicPlayerBlack: 
             // For all possible moves for player,
             val childBoard = board.getCopy()
             childBoard.executeMove(move)
-            value = max(value, alphabeta(childBoard, ply - 1, ab, heuristicPlayerBlack, false))
-//            println("Info at $index of ${board.getAllNextValidMoves().size} at ply ${ply} abstore: ${ab} hash: ${System.identityHashCode(ab)}")
-            ab.alpha = max(ab.alpha, value)
-            if (ab.alpha >= ab.beta) {
-                println("Max skipping at $index of ${board.getAllNextValidMoves().size} at ply ${ply} abstore: ${ab} hash: ${System.identityHashCode(ab)}")
+            value = max(value, alphabeta(childBoard, ply - 1, alpha, beta, heuristicPlayerBlack, false))
+            alpha = max(alpha, value)
+            if (alpha >= beta) {
                 break
             }
         }
@@ -194,11 +194,9 @@ fun alphabeta(board: Board, ply: Int, ab: AlphaBetaStore, heuristicPlayerBlack: 
         for ((index, move) in board.getAllNextValidMoves().withIndex()) {
             val childBoard = board.getCopy()
             childBoard.executeMove(move)
-            value = min(value, alphabeta(childBoard, ply - 1, ab, heuristicPlayerBlack, true))
-//            println("Info at $index of ${board.getAllNextValidMoves().size} at ply ${ply} abstore: ${ab} hash: ${System.identityHashCode(ab)}")
-            ab.beta = min(ab.beta, value)
-            if (ab.alpha >= ab.beta) {
-                println("Max skipping at $index of ${board.getAllNextValidMoves().size} at ply ${ply} abstore: ${ab} hash: ${System.identityHashCode(ab)}")
+            value = min(value, alphabeta(childBoard, ply - 1, alpha, beta, heuristicPlayerBlack, true))
+            beta = min(beta, value)
+            if (alpha >= beta) {
                 break
             }
         }
